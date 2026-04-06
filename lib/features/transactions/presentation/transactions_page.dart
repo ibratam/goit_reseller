@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/brand_background.dart';
 import '../../../core/widgets/language_menu_button.dart';
 import '../../auth/domain/auth_session.dart';
+import '../data/transaction_excel_exporter.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction_history.dart';
 
@@ -33,7 +35,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   TransactionHistoryQuery _query = const TransactionHistoryQuery();
   TransactionHistoryResponse? _response;
+  final TransactionExcelExporter _excelExporter = TransactionExcelExporter();
   bool _isLoading = false;
+  bool _isExporting = false;
+  bool _filtersExpanded = false;
   String? _errorText;
 
   String? _transactionType;
@@ -138,6 +143,104 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _loadTransactions();
   }
 
+  Future<List<UserTransaction>> _fetchTransactionsForExport() async {
+    final exportQuery = _query.copyWith(perPage: 100);
+    final firstPage = await widget.transactionRepository.fetchTransactions(
+      session: widget.session,
+      query: exportQuery,
+      page: 1,
+    );
+
+    final allTransactions = <UserTransaction>[
+      ...firstPage.transactions,
+    ];
+
+    for (var page = 2; page <= firstPage.meta.lastPage; page++) {
+      final nextPage = await widget.transactionRepository.fetchTransactions(
+        session: widget.session,
+        query: exportQuery,
+        page: page,
+      );
+      allTransactions.addAll(nextPage.transactions);
+    }
+
+    return allTransactions;
+  }
+
+  Future<void> _exportTransactions() async {
+    final l10n = context.l10n;
+    if (_isLoading || _isExporting) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isExporting = true;
+    });
+
+    try {
+      final transactions = await _fetchTransactionsForExport();
+      if (transactions.isEmpty) {
+        if (mounted) {
+          _showMessage(l10n.noTransactionsToExport);
+        }
+        return;
+      }
+
+      final exportFile = _excelExporter.buildWorkbook(transactions);
+      await SharePlus.instance.share(
+        ShareParams(
+          title: l10n.transactionsTitle,
+          subject: l10n.transactionsTitle,
+          text: l10n.transactionsExported(transactions.length),
+          files: [
+            XFile.fromData(
+              exportFile.bytes,
+              mimeType:
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              name: exportFile.fileName,
+            ),
+          ],
+          fileNameOverrides: [exportFile.fileName],
+          sharePositionOrigin: _sharePositionOrigin(),
+        ),
+      );
+
+      if (mounted) {
+        _showMessage(l10n.transactionsExported(transactions.length));
+      }
+    } on TransactionException catch (error) {
+      if (mounted) {
+        _showMessage(context.l10n.localizeDynamicMessage(error.message));
+      }
+    } catch (_) {
+      if (mounted) {
+        _showMessage(l10n.unableToExportTransactions);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExporting = false;
+        });
+      }
+    }
+  }
+
+  Rect? _sharePositionOrigin() {
+    final renderObject = context.findRenderObject();
+    if (renderObject is! RenderBox) {
+      return null;
+    }
+
+    return renderObject.localToGlobal(Offset.zero) & renderObject.size;
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> _pickDate(TextEditingController controller) async {
     final initialDate = _parseDate(controller.text) ?? DateTime.now();
     final pickedDate = await showDatePicker(
@@ -189,6 +292,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
       appBar: AppBar(
         title: Text(l10n.transactionsTitle),
         actions: [
+          IconButton(
+            onPressed: _isLoading || _isExporting ? null : _exportTransactions,
+            tooltip: l10n.exportTransactionsTooltip,
+            icon: _isExporting
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.file_download_outlined),
+          ),
           LanguageMenuButton(
             currentLocale: widget.currentLocale,
             onLocaleChanged: widget.onLocaleChanged,
@@ -214,227 +328,320 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isCompact = constraints.maxWidth < 720;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.filterTransactions,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            setState(() {
+                              _filtersExpanded = !_filtersExpanded;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 4,
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              l10n.filterTransactionsSubtitle,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: const Color(0xFF4B5563),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
+                            child: Row(
                               children: [
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: DropdownButtonFormField<int>(
-                                    key: ValueKey('per-page-${_query.perPage}'),
-                                    initialValue: _query.perPage,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.perPageLabel,
-                                      prefixIcon: const Icon(Icons.format_list_numbered),
-                                    ),
-                                    items: const [
-                                      DropdownMenuItem(
-                                        value: 10,
-                                        child: Text('10'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 20,
-                                        child: Text('20'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 50,
-                                        child: Text('50'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 100,
-                                        child: Text('100'),
-                                      ),
-                                    ],
-                                    onChanged: (value) {
-                                      if (value == null) {
-                                        return;
-                                      }
-                                      setState(() {
-                                        _query = _query.copyWith(perPage: value);
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: DropdownButtonFormField<String?>(
-                                    key: ValueKey(
-                                      'transaction-type-${_transactionType ?? 'all'}',
-                                    ),
-                                    initialValue: _transactionType,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.transactionTypeLabel,
-                                      prefixIcon: const Icon(Icons.swap_horiz),
-                                    ),
-                                    items: [
-                                      DropdownMenuItem<String?>(
-                                        value: null,
-                                        child: Text(l10n.allLabel),
-                                      ),
-                                      DropdownMenuItem<String?>(
-                                        value: 'credit',
-                                        child: Text(l10n.creditLabel),
-                                      ),
-                                      DropdownMenuItem<String?>(
-                                        value: 'debit',
-                                        child: Text(l10n.debitLabel),
-                                      ),
-                                    ],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _transactionType = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: DropdownButtonFormField<String?>(
-                                    key: ValueKey(
-                                      'payment-method-${_paymentMethod ?? 'all'}',
-                                    ),
-                                    initialValue: _paymentMethod,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.paymentMethodLabel,
-                                      prefixIcon: const Icon(Icons.payments_outlined),
-                                    ),
-                                    items: [
-                                      DropdownMenuItem<String?>(
-                                        value: null,
-                                        child: Text(l10n.allLabel),
-                                      ),
-                                      DropdownMenuItem<String?>(
-                                        value: 'cash',
-                                        child: Text(l10n.cashLabel),
-                                      ),
-                                      DropdownMenuItem<String?>(
-                                        value: 'cheque',
-                                        child: Text(l10n.chequeLabel),
-                                      ),
-                                    ],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _paymentMethod = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: TextField(
-                                    controller: _operationTypeController,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.operationTypeLabel,
-                                      prefixIcon: const Icon(Icons.tune),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: TextField(
-                                    controller: _startDateController,
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.startDateLabel,
-                                      prefixIcon: const Icon(Icons.event_outlined),
-                                      suffixIcon: IconButton(
-                                        onPressed: _startDateController.text.isEmpty
-                                            ? null
-                                            : () {
-                                                _startDateController.clear();
-                                                setState(() {});
-                                              },
-                                        icon: const Icon(Icons.close),
-                                      ),
-                                    ),
-                                    onTap: () => _pickDate(_startDateController),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 220,
-                                  child: TextField(
-                                    controller: _endDateController,
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.endDateLabel,
-                                      prefixIcon: const Icon(Icons.event_busy_outlined),
-                                      suffixIcon: IconButton(
-                                        onPressed: _endDateController.text.isEmpty
-                                            ? null
-                                            : () {
-                                                _endDateController.clear();
-                                                setState(() {});
-                                              },
-                                        icon: const Icon(Icons.close),
-                                      ),
-                                    ),
-                                    onTap: () => _pickDate(_endDateController),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: [
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 160,
-                                  child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _applyFilters,
-                                    child: _isLoading
-                                        ? const SizedBox(
-                                            height: 18,
-                                            width: 18,
-                                        child: CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.filterTransactions,
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
                                             ),
-                                          )
-                                        : Text(l10n.apply),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        l10n.filterTransactionsSubtitle,
+                                        style: theme.textTheme.bodyLarge
+                                            ?.copyWith(
+                                              color: const Color(0xFF4B5563),
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(
-                                  width: isCompact ? double.infinity : 160,
-                                  child: OutlinedButton(
-                                    onPressed: _isLoading ? null : _clearFilters,
-                                    child: Text(l10n.clear),
+                                const SizedBox(width: 12),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _filtersExpanded = !_filtersExpanded;
+                                    });
+                                  },
+                                  tooltip: _filtersExpanded
+                                      ? l10n.hideFilters
+                                      : l10n.showFilters,
+                                  icon: AnimatedRotation(
+                                    turns: _filtersExpanded ? 0.5 : 0,
+                                    duration: const Duration(milliseconds: 180),
+                                    child: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            if (_errorText != null) ...[
-                              const SizedBox(height: 12),
-                              Text(
-                                l10n.localizeDynamicMessage(_errorText!),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
+                          ),
+                        ),
+                        AnimatedCrossFade(
+                          firstChild: Padding(
+                            padding: const EdgeInsets.only(top: 24),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isCompact = constraints.maxWidth < 720;
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      children: [
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child: DropdownButtonFormField<int>(
+                                            key: ValueKey(
+                                              'per-page-${_query.perPage}',
+                                            ),
+                                            initialValue: _query.perPage,
+                                            decoration: InputDecoration(
+                                              labelText: l10n.perPageLabel,
+                                              prefixIcon: const Icon(
+                                                Icons.format_list_numbered,
+                                              ),
+                                            ),
+                                            items: const [
+                                              DropdownMenuItem(
+                                                value: 10,
+                                                child: Text('10'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 20,
+                                                child: Text('20'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 50,
+                                                child: Text('50'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 100,
+                                                child: Text('100'),
+                                              ),
+                                            ],
+                                            onChanged: (value) {
+                                              if (value == null) {
+                                                return;
+                                              }
+                                              setState(() {
+                                                _query = _query.copyWith(
+                                                  perPage: value,
+                                                );
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child:
+                                              DropdownButtonFormField<String?>(
+                                            key: ValueKey(
+                                              'transaction-type-${_transactionType ?? 'all'}',
+                                            ),
+                                            initialValue: _transactionType,
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  l10n.transactionTypeLabel,
+                                              prefixIcon:
+                                                  const Icon(Icons.swap_horiz),
+                                            ),
+                                            items: [
+                                              DropdownMenuItem<String?>(
+                                                value: null,
+                                                child: Text(l10n.allLabel),
+                                              ),
+                                              DropdownMenuItem<String?>(
+                                                value: 'credit',
+                                                child: Text(l10n.creditLabel),
+                                              ),
+                                              DropdownMenuItem<String?>(
+                                                value: 'debit',
+                                                child: Text(l10n.debitLabel),
+                                              ),
+                                            ],
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _transactionType = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child:
+                                              DropdownButtonFormField<String?>(
+                                            key: ValueKey(
+                                              'payment-method-${_paymentMethod ?? 'all'}',
+                                            ),
+                                            initialValue: _paymentMethod,
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  l10n.paymentMethodLabel,
+                                              prefixIcon: const Icon(
+                                                Icons.payments_outlined,
+                                              ),
+                                            ),
+                                            items: [
+                                              DropdownMenuItem<String?>(
+                                                value: null,
+                                                child: Text(l10n.allLabel),
+                                              ),
+                                              DropdownMenuItem<String?>(
+                                                value: 'cash',
+                                                child: Text(l10n.cashLabel),
+                                              ),
+                                              DropdownMenuItem<String?>(
+                                                value: 'cheque',
+                                                child: Text(l10n.chequeLabel),
+                                              ),
+                                            ],
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _paymentMethod = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child: TextField(
+                                            controller: _operationTypeController,
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  l10n.operationTypeLabel,
+                                              prefixIcon:
+                                                  const Icon(Icons.tune),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child: TextField(
+                                            controller: _startDateController,
+                                            readOnly: true,
+                                            decoration: InputDecoration(
+                                              labelText: l10n.startDateLabel,
+                                              prefixIcon: const Icon(
+                                                Icons.event_outlined,
+                                              ),
+                                              suffixIcon: IconButton(
+                                                onPressed:
+                                                    _startDateController
+                                                            .text
+                                                            .isEmpty
+                                                        ? null
+                                                        : () {
+                                                            _startDateController
+                                                                .clear();
+                                                            setState(() {});
+                                                          },
+                                                icon: const Icon(Icons.close),
+                                              ),
+                                            ),
+                                            onTap: () =>
+                                                _pickDate(_startDateController),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 220,
+                                          child: TextField(
+                                            controller: _endDateController,
+                                            readOnly: true,
+                                            decoration: InputDecoration(
+                                              labelText: l10n.endDateLabel,
+                                              prefixIcon: const Icon(
+                                                Icons.event_busy_outlined,
+                                              ),
+                                              suffixIcon: IconButton(
+                                                onPressed:
+                                                    _endDateController
+                                                            .text
+                                                            .isEmpty
+                                                        ? null
+                                                        : () {
+                                                            _endDateController
+                                                                .clear();
+                                                            setState(() {});
+                                                          },
+                                                icon: const Icon(Icons.close),
+                                              ),
+                                            ),
+                                            onTap: () =>
+                                                _pickDate(_endDateController),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      children: [
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 160,
+                                          child: ElevatedButton(
+                                            onPressed:
+                                                _isLoading ? null : _applyFilters,
+                                            child: _isLoading
+                                                ? const SizedBox(
+                                                    height: 18,
+                                                    width: 18,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  )
+                                                : Text(l10n.apply),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: isCompact ? double.infinity : 160,
+                                          child: OutlinedButton(
+                                            onPressed:
+                                                _isLoading ? null : _clearFilters,
+                                            child: Text(l10n.clear),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (_errorText != null) ...[
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        l10n.localizeDynamicMessage(_errorText!),
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme.colorScheme.error,
+                                            ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          secondChild: const SizedBox.shrink(),
+                          crossFadeState: _filtersExpanded
+                              ? CrossFadeState.showFirst
+                              : CrossFadeState.showSecond,
+                          duration: const Duration(milliseconds: 180),
+                          sizeCurve: Curves.easeInOut,
+                        ),
+                      ],
                     ),
                   ),
                 ),

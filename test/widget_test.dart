@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goit_reseller/app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('shows login page', (tester) async {
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
+
     await tester.pumpWidget(const GoitResellerApp());
     await tester.pumpAndSettle();
 

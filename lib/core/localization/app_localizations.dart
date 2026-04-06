@@ -111,6 +111,7 @@ class AppLocalizations {
       isArabic ? 'رقم العميل' : 'Customer ID';
   String get usernameFieldLabel =>
       isArabic ? 'اسم المستخدم' : 'Username';
+  String get priceLabel => isArabic ? 'السعر' : 'Price';
   String get startLabel => isArabic ? 'البداية' : 'Start';
   String get endLabel => isArabic ? 'النهاية' : 'End';
   String get addCredit => isArabic ? 'إضافة رصيد' : 'Add Credit';
@@ -138,6 +139,18 @@ class AppLocalizations {
 
   String get filterTransactions =>
       isArabic ? 'تصفية المعاملات' : 'Filter transactions';
+  String get exportTransactionsTooltip =>
+      isArabic ? 'تصدير إلى إكسل' : 'Export to Excel';
+  String get noTransactionsToExport =>
+      isArabic ? 'لا توجد معاملات للتصدير.' : 'No transactions to export.';
+  String transactionsExported(int count) => isArabic
+      ? 'تم تجهيز ملف إكسل لـ $count معاملات.'
+      : 'Prepared an Excel file for $count transactions.';
+  String get unableToExportTransactions => isArabic
+      ? 'تعذر تصدير المعاملات الآن.'
+      : 'Unable to export transactions right now.';
+  String get showFilters => isArabic ? 'إظهار المرشحات' : 'Show filters';
+  String get hideFilters => isArabic ? 'إخفاء المرشحات' : 'Hide filters';
   String get filterTransactionsSubtitle => isArabic
       ? 'استخدم المرشحات لتضييق سجل المعاملات حسب النوع أو العملية أو طريقة الدفع أو الفترة الزمنية.'
       : 'Use the API filters to narrow your transaction history by type, operation, payment method, or date range.';

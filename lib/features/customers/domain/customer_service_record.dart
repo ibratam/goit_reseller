@@ -12,6 +12,7 @@ class CustomerServiceRecord {
     required this.startDate,
     required this.endDate,
     required this.isOnline,
+    required this.effectivePrice,
     required this.creditBalance,
     required this.debitBalance,
     required this.customer,
@@ -30,6 +31,7 @@ class CustomerServiceRecord {
   final String? startDate;
   final String? endDate;
   final bool isOnline;
+  final double? effectivePrice;
   final double creditBalance;
   final double debitBalance;
   final CustomerSummary customer;
@@ -52,6 +54,7 @@ class CustomerServiceRecord {
       startDate: _toNullableString(json['start_date']),
       endDate: _toNullableString(json['end_date']),
       isOnline: _toBool(json['is_online']),
+      effectivePrice: _toNullableDouble(json['effective_price']),
       creditBalance: _toDouble(json['credit_balance']),
       debitBalance: _toDouble(json['debit_balance']),
       customer: CustomerSummary.fromJson(
@@ -80,6 +83,7 @@ class CustomerServiceRecord {
       startDate: startDate,
       endDate: endDate,
       isOnline: isOnline,
+      effectivePrice: effectivePrice,
       creditBalance: creditBalance ?? this.creditBalance,
       debitBalance: debitBalance ?? this.debitBalance,
       customer: customer,
@@ -148,6 +152,25 @@ double _toDouble(dynamic value) {
   return double.tryParse(value?.toString() ?? '') ?? 0;
 }
 
+double? _toNullableDouble(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is double) {
+    return value;
+  }
+  if (value is num) {
+    return value.toDouble();
+  }
+
+  final normalized = value.toString().trim();
+  if (normalized.isEmpty) {
+    return null;
+  }
+
+  return double.tryParse(normalized);
+}
+
 bool _toBool(dynamic value) {
   if (value is bool) {
     return value;
@@ -170,4 +193,3 @@ String? _toNullableString(dynamic value) {
   }
   return text;
 }
-

@@ -302,238 +302,241 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                   //   child: BrandLogo(width: 190),
                   // ),
                   // const SizedBox(height: 20),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(color: Color(0xFFE5E7EB)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name.isEmpty ? user.username : user.name,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.signedInAs(user.username),
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: const Color(0xFF4B5563),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            // _DetailChip(
-                            //   label: l10n.userIdLabel,
-                            //   value: '${user.id}',
-                            //   icon: Icons.badge_outlined,
-                            // ),
-                            if (user.mobile != null)
-                              _DetailChip(
-                                label: l10n.mobileLabel,
-                                value: user.mobile!,
-                                icon: Icons.phone_outlined,
-                              ),
-                            // if (user.userType != null)
-                            //   _DetailChip(
-                            //     label: l10n.roleLabel,
-                            //     value: l10n.localizeValue(user.userType!),
-                            //     icon: Icons.admin_panel_settings_outlined,
-                            //   ),
-                            _DetailChip(
-                              label: l10n.creditLabel,
-                              value: formatMoney(user.creditBalance),
-                              icon: Icons.account_balance_wallet_outlined,
-                            ),
-                            _DetailChip(
-                              label: l10n.debitLabel,
-                              value: formatMoney(user.debitBalance),
-                              icon: Icons.payments_outlined,
-                            ),
-                            // _DetailChip(
-                            //   label: l10n.apiHostLabel,
-                            //   value: _apiHostLabel.isEmpty
-                            //       ? l10n.notConfigured
-                            //       : _apiHostLabel,
-                            //   icon: Icons.cloud_outlined,
-                            // ),
-                          ],
-                        ),
-                      ],
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(color: Color(0xFFE5E7EB)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isCompact = constraints.maxWidth < 720;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.searchCustomerServicesTitle,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            // Text(
-                            //   l10n.searchCustomerServicesSubtitle,
-                            //   style: theme.textTheme.bodyLarge?.copyWith(
-                            //     color: const Color(0xFF4B5563),
-                            //   ),
-                            // ),
-                            // const SizedBox(height: 24),
-                            if (isCompact) ...[
-                              TextField(
-                                controller: _customerNameController,
-                                decoration: InputDecoration(
-                                  labelText: l10n.customerNameLabel,
-                                  prefixIcon:
-                                      const Icon(Icons.person_search_outlined),
-                                ),
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 12),
-                              TextField(
-                                controller: _mobileController,
-                                decoration: InputDecoration(
-                                  labelText: l10n.mobileNumberLabel,
-                                  prefixIcon: const Icon(Icons.phone_outlined),
-                                ),
-                                keyboardType: TextInputType.phone,
-                                textInputAction: TextInputAction.search,
-                                onSubmitted: (_) => _search(),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: _isSearching ? null : _search,
-                                child: _isSearching
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(l10n.search),
-                              ),
-                            ] else
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _customerNameController,
-                                      decoration: InputDecoration(
-                                        labelText: l10n.customerNameLabel,
-                                        prefixIcon: const Icon(
-                                          Icons.person_search_outlined,
-                                        ),
-                                      ),
-                                      textInputAction: TextInputAction.next,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _mobileController,
-                                      decoration: InputDecoration(
-                                        labelText: l10n.mobileNumberLabel,
-                                        prefixIcon:
-                                            const Icon(Icons.phone_outlined),
-                                      ),
-                                      keyboardType: TextInputType.phone,
-                                      textInputAction: TextInputAction.search,
-                                      onSubmitted: (_) => _search(),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  SizedBox(
-                                    width: 140,
-                                    child: ElevatedButton(
-                                      onPressed: _isSearching ? null : _search,
-                                      child: _isSearching
-                                          ? const SizedBox(
-                                              height: 20,
-                                              width: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : Text(l10n.search),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (_errorText != null) ...[
-                              const SizedBox(height: 12),
-                              Text(
-                                l10n.localizeDynamicMessage(_errorText!),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (_isSearching)
-                  const Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else if (!_hasSearch)
-                  _EmptyState(
-                    title: l10n.noSearchYet,
-                    description: l10n.noSearchYetDescription,
-                  )
-                else if (_results.isEmpty)
-                  _EmptyState(
-                    title: l10n.noResultsFound,
-                    description: l10n.noSubscriptionMatched(_lastCriteria),
-                  )
-                else ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      l10n.resultCount(_results.length),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.name.isEmpty ? user.username : user.name,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.signedInAs(user.username),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: const Color(0xFF4B5563),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              // _DetailChip(
+                              //   label: l10n.userIdLabel,
+                              //   value: '${user.id}',
+                              //   icon: Icons.badge_outlined,
+                              // ),
+                              if (user.mobile != null)
+                                _DetailChip(
+                                  label: l10n.mobileLabel,
+                                  value: user.mobile!,
+                                  icon: Icons.phone_outlined,
+                                ),
+                              // if (user.userType != null)
+                              //   _DetailChip(
+                              //     label: l10n.roleLabel,
+                              //     value: l10n.localizeValue(user.userType!),
+                              //     icon: Icons.admin_panel_settings_outlined,
+                              //   ),
+                              _DetailChip(
+                                label: l10n.creditLabel,
+                                value: formatMoney(user.creditBalance),
+                                icon: Icons.account_balance_wallet_outlined,
+                              ),
+                              _DetailChip(
+                                label: l10n.debitLabel,
+                                value: formatMoney(user.debitBalance),
+                                icon: Icons.payments_outlined,
+                              ),
+                              // _DetailChip(
+                              //   label: l10n.apiHostLabel,
+                              //   value: _apiHostLabel.isEmpty
+                              //       ? l10n.notConfigured
+                              //       : _apiHostLabel,
+                              //   icon: Icons.cloud_outlined,
+                              // ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  ..._results.map(
-                    (record) => Padding(
+                  const SizedBox(height: 20),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isCompact = constraints.maxWidth < 720;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.searchCustomerServicesTitle,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              // Text(
+                              //   l10n.searchCustomerServicesSubtitle,
+                              //   style: theme.textTheme.bodyLarge?.copyWith(
+                              //     color: const Color(0xFF4B5563),
+                              //   ),
+                              // ),
+                              // const SizedBox(height: 24),
+                              if (isCompact) ...[
+                                TextField(
+                                  controller: _customerNameController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n.customerNameLabel,
+                                    prefixIcon: const Icon(
+                                        Icons.person_search_outlined),
+                                  ),
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _mobileController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n.mobileNumberLabel,
+                                    prefixIcon:
+                                        const Icon(Icons.phone_outlined),
+                                  ),
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.search,
+                                  onSubmitted: (_) => _search(),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: _isSearching ? null : _search,
+                                  child: _isSearching
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(l10n.search),
+                                ),
+                              ] else
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _customerNameController,
+                                        decoration: InputDecoration(
+                                          labelText: l10n.customerNameLabel,
+                                          prefixIcon: const Icon(
+                                            Icons.person_search_outlined,
+                                          ),
+                                        ),
+                                        textInputAction: TextInputAction.next,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _mobileController,
+                                        decoration: InputDecoration(
+                                          labelText: l10n.mobileNumberLabel,
+                                          prefixIcon:
+                                              const Icon(Icons.phone_outlined),
+                                        ),
+                                        keyboardType: TextInputType.phone,
+                                        textInputAction: TextInputAction.search,
+                                        onSubmitted: (_) => _search(),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    SizedBox(
+                                      width: 140,
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            _isSearching ? null : _search,
+                                        child: _isSearching
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : Text(l10n.search),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (_errorText != null) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  l10n.localizeDynamicMessage(_errorText!),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (_isSearching)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else if (!_hasSearch)
+                    _EmptyState(
+                      title: l10n.noSearchYet,
+                      description: l10n.noSearchYetDescription,
+                    )
+                  else if (_results.isEmpty)
+                    _EmptyState(
+                      title: l10n.noResultsFound,
+                      description: l10n.noSubscriptionMatched(_lastCriteria),
+                    )
+                  else ...[
+                    Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _CustomerServiceCard(
-                        record: record,
-                        onAddCredit: () => _openAddCreditDialog(record),
+                      child: Text(
+                        l10n.resultCount(_results.length),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    ..._results.map(
+                      (record) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _CustomerServiceCard(
+                          record: record,
+                          onAddCredit: () => _openAddCreditDialog(record),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -642,6 +645,12 @@ class _CustomerServiceCard extends StatelessWidget {
                     label: context.l10n.usernameFieldLabel,
                     value: record.username,
                     icon: Icons.alternate_email,
+                  ),
+                if (record.effectivePrice != null)
+                  _DetailChip(
+                    label: context.l10n.priceLabel,
+                    value: formatMoney(record.effectivePrice),
+                    icon: Icons.sell_outlined,
                   ),
                 _DetailChip(
                   label: context.l10n.creditLabel,

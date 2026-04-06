@@ -41,6 +41,22 @@ class AppUser {
       debitBalance: _toDouble(json['debit_balance']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'owner_id': ownerId,
+      'username': username,
+      'name': name,
+      'email': email,
+      'mobile': mobile,
+      'status': status,
+      'user_type': userType,
+      'credit_account': hasCreditAccount ? 'yes' : 'no',
+      'credit_balance': creditBalance,
+      'debit_balance': debitBalance,
+    };
+  }
 }
 
 int _toInt(dynamic value) {
@@ -74,4 +90,3 @@ String? _toNullableString(dynamic value) {
   }
   return text;
 }
-

@@ -26,6 +26,14 @@ class AuthSession {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'token_type': tokenType,
+      'token': token,
+      'user': user.toJson(),
+    };
+  }
+
   AuthSession copyWith({
     AppUser? user,
   }) {
