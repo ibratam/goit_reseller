@@ -1,8 +1,11 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/formatters.dart';
+import '../../auth/domain/app_user.dart';
 import '../../auth/domain/auth_session.dart';
 import '../domain/credit_transaction_result.dart';
+import '../domain/customer_lookup_result.dart';
 import '../domain/customer_service_record.dart';
+import '../domain/service_extension_result.dart';
 import 'customer_repository.dart';
 
 class ApiCustomerRepository implements CustomerRepository {
@@ -15,11 +18,15 @@ class ApiCustomerRepository implements CustomerRepository {
     required AuthSession session,
     String? customerName,
     String? mobile,
+    bool? expired,
+    int? expiresInDays,
     int limit = 20,
   }) async {
     final trimmedName = customerName?.trim();
     final trimmedMobile = mobile?.trim();
-    if ((trimmedName == null || trimmedName.isEmpty) &&
+    final hasFilter = expired != null || expiresInDays != null;
+    if (!hasFilter &&
+        (trimmedName == null || trimmedName.isEmpty) &&
         (trimmedMobile == null || trimmedMobile.isEmpty)) {
       throw const CustomerSearchException(
         'Enter a customer name or mobile number.',
@@ -33,8 +40,10 @@ class ApiCustomerRepository implements CustomerRepository {
         '/api/customers/services/search',
         authorization: session.authorizationValue,
         queryParameters: {
-          'customer_name': trimmedName,
-          'mobile': trimmedMobile,
+          if (trimmedName != null) 'customer_name': trimmedName,
+          if (trimmedMobile != null) 'mobile': trimmedMobile,
+          if (expired != null) 'expired': expired ? '1' : '0',
+          if (expiresInDays != null) 'expires_in_days': '$expiresInDays',
           'limit': '$safeLimit',
         },
       );
@@ -136,5 +145,122 @@ class ApiCustomerRepository implements CustomerRepository {
     }
     return message;
   }
-}
 
+  @override
+  Future<CustomerLookupResult> lookupCustomer({required String mobile}) async {
+    final trimmedMobile = mobile.trim();
+    if (trimmedMobile.isEmpty) {
+      throw const CustomerSearchException('Mobile number is required.');
+    }
+
+    try {
+      final response = await _apiClient.post(
+        '/api/customers/lookup',
+        body: {'mobile': trimmedMobile},
+      );
+
+      return CustomerLookupResult.fromJson(response.data);
+    } on ApiException catch (error) {
+      throw CustomerSearchException(error.message);
+    }
+  }
+
+  @override
+  Future<AppUser> fetchCurrentUser({required AuthSession session}) async {
+    try {
+      final response = await _apiClient.get(
+        '/api/customers',
+        authorization: session.authorizationValue,
+      );
+
+      return AppUser.fromJson(response.data);
+    } on ApiException catch (error) {
+      throw CustomerSearchException(error.message);
+    }
+  }
+
+  @override
+  Future<CustomerLookupResult> mobileExists({
+    required AuthSession session,
+    required String mobile,
+  }) async {
+    final trimmedMobile = mobile.trim();
+    if (trimmedMobile.isEmpty) {
+      throw const CustomerSearchException('Mobile number is required.');
+    }
+
+    try {
+      final response = await _apiClient.post(
+        '/api/customers/mobile-exists',
+        authorization: session.authorizationValue,
+        body: {'mobile': trimmedMobile},
+      );
+
+      return CustomerLookupResult.fromJson(response.data);
+    } on ApiException catch (error) {
+      throw CustomerSearchException(error.message);
+    }
+  }
+
+  @override
+  Future<ServiceExtensionResult> extendSubscriptionOneDay({
+    required AuthSession session,
+    required int customerServiceId,
+  }) async {
+    if (customerServiceId <= 0) {
+      throw const CustomerSearchException('Customer service ID is required.');
+    }
+
+    try {
+      final response = await _apiClient.post(
+        '/api/customers/subscription-extend-one-day?id=$customerServiceId',
+        authorization: session.authorizationValue,
+        body: {
+          'id': customerServiceId,
+          'customer_service_id': customerServiceId,
+        },
+      );
+
+      if (response.data['success'] == true) {
+        return ServiceExtensionResult.fromJson(response.data);
+      }
+
+      throw CustomerSearchException(
+        _resolveMessage(response.data, fallback: 'Unable to extend service.'),
+      );
+    } on ApiException catch (error) {
+      throw CustomerSearchException(error.message);
+    }
+  }
+
+  @override
+  Future<ServiceExtensionResult> extendService({
+    required AuthSession session,
+    required int customerServiceId,
+  }) async {
+    if (customerServiceId <= 0) {
+      throw const CustomerSearchException('Customer service ID is required.');
+    }
+
+    try {
+      final response = await _apiClient.post(
+        '/api/customers/extend-service',
+        authorization: session.authorizationValue,
+        body: {
+          'id': customerServiceId,
+          'customer_service_id': customerServiceId,
+        },
+      );
+
+      if (response.data['success'] == true) {
+        return ServiceExtensionResult.fromJson(response.data);
+      }
+
+      throw CustomerSearchException(
+        _resolveMessage(response.data, fallback: 'Unable to extend service.'),
+      );
+    } on ApiException catch (error) {
+      throw CustomerSearchException(error.message);
+    }
+  }
+}

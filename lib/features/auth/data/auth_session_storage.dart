@@ -17,7 +17,7 @@ class StoredAuthSession {
 }
 
 class AuthSessionStorage {
-  static const Duration sessionLifetime = Duration(hours: 1);
+  static const Duration sessionLifetime = Duration(days: 2);
 
   static const String _sessionKey = 'auth.session.json';
   static const String _expiresAtKey = 'auth.session.expires_at_ms';

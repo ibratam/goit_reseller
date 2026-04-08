@@ -42,6 +42,32 @@ class AppLocalizations {
   String get enterPassword =>
       isArabic ? 'أدخل كلمة المرور' : 'Enter your password';
   String get signIn => isArabic ? 'تسجيل الدخول' : 'Sign In';
+  String get signInWithBiometrics =>
+      isArabic ? 'تسجيل الدخول بالقياسات الحيوية' : 'Sign in with biometrics';
+  String get signInWithFaceId =>
+      isArabic ? 'تسجيل الدخول عبر Face ID' : 'Sign in with Face ID';
+  String get signInWithTouchId =>
+      isArabic ? 'تسجيل الدخول عبر Touch ID' : 'Sign in with Touch ID';
+  String get signInWithFingerprint =>
+      isArabic ? 'تسجيل الدخول ببصمة الإصبع' : 'Sign in with fingerprint';
+  String get biometricSignInReason => isArabic
+      ? 'أكّد هويتك لتسجيل الدخول.'
+      : 'Confirm your identity to sign in.';
+  String get biometricLoginUnavailable => isArabic
+      ? 'تسجيل الدخول بالقياسات الحيوية غير متاح الآن.'
+      : 'Biometric sign-in is not available right now.';
+  String get biometricLoginCancelled => isArabic
+      ? 'تم إلغاء التحقق الحيوي.'
+      : 'Biometric authentication was cancelled.';
+  String get biometricLoginFailed => isArabic
+      ? 'فشل تسجيل الدخول بالقياسات الحيوية. استخدم كلمة المرور وحاول مرة أخرى.'
+      : 'Biometric sign-in failed. Use your password and try again.';
+  String get biometricLoginNeedsPassword => isArabic
+      ? 'لا توجد بيانات محفوظة لتسجيل الدخول الحيوي. سجّل الدخول بكلمة المرور أولاً.'
+      : 'No saved biometric sign-in is available. Sign in with your password first.';
+  String get biometricLoginCredentialsExpired => isArabic
+      ? 'بيانات تسجيل الدخول الحيوي لم تعد صالحة. سجّل الدخول بكلمة المرور مرة أخرى.'
+      : 'Saved biometric sign-in details are no longer valid. Sign in with your password again.';
   String get changeLanguageTooltip =>
       isArabic ? 'تغيير اللغة' : 'Change language';
   String get loginFailedTryAgain =>
@@ -55,6 +81,10 @@ class AppLocalizations {
 
   String get customerSearchTitle =>
       isArabic ? 'بحث العملاء' : 'Customer Search';
+  String get dashboardTitle =>
+      isArabic ? 'لوحة التحكم' : 'Dashboard';
+  String get navMenuTooltip =>
+      isArabic ? 'القائمة' : 'Menu';
   String get transactionsTitle =>
       isArabic ? 'معاملاتي' : 'My Transactions';
   String get myTransactionsTooltip =>
@@ -78,6 +108,8 @@ class AppLocalizations {
   String get searchCustomerServicesSubtitle => isArabic
       ? 'ابحث باسم العميل أو رقم الجوال أو كليهما. يتم جلب النتائج من /api/customers/services/search.'
       : 'Search with customer name, mobile number, or both. Results come from /api/customers/services/search.';
+  String get serviceStatusFilterLabel =>
+      isArabic ? 'تصفية حالة الخدمة' : 'Service status';
   String get customerNameLabel =>
       isArabic ? 'اسم العميل' : 'Customer name';
   String get mobileNumberLabel =>
@@ -117,6 +149,11 @@ class AppLocalizations {
   String get addCredit => isArabic ? 'إضافة رصيد' : 'Add Credit';
   String get addCreditTitle =>
       isArabic ? 'إضافة رصيد' : 'Add Credit';
+  String get extendServiceAction =>
+      isArabic ? 'تمديد الخدمة' : 'Extend Service';
+  String serviceExtendedUntil(String endDate) => isArabic
+      ? 'تم تمديد الخدمة بنجاح حتى $endDate.'
+      : 'Service extended successfully until $endDate.';
   String get amountLabel => isArabic ? 'المبلغ' : 'Amount';
   String get enterValidAmount =>
       isArabic ? 'أدخل مبلغًا صحيحًا' : 'Enter a valid amount';
@@ -134,6 +171,8 @@ class AppLocalizations {
   String get submit => isArabic ? 'إرسال' : 'Submit';
   String get unableToAddCredit =>
       isArabic ? 'تعذر إضافة الرصيد الآن.' : 'Unable to add credit right now.';
+  String get unableToExtendService =>
+      isArabic ? 'تعذر تمديد الخدمة الآن.' : 'Unable to extend service right now.';
   String get apiRechargeNote =>
       isArabic ? 'شحن عبر الواجهة' : 'API recharge';
 
@@ -141,6 +180,52 @@ class AppLocalizations {
       isArabic ? 'تصفية المعاملات' : 'Filter transactions';
   String get exportTransactionsTooltip =>
       isArabic ? 'تصدير إلى إكسل' : 'Export to Excel';
+  String get expiringCustomersTitle => isArabic
+      ? 'اشتراكات تنتهي قريبًا'
+      : 'Expiring Subscriptions';
+  String get expiringCustomersTooltip => isArabic
+      ? 'اشتراكات تنتهي خلال 3 أيام'
+      : 'Subscriptions expiring within 3 days';
+  String get expiredCustomersTitle => isArabic
+      ? 'اشتراكات منتهية'
+      : 'Expired Subscriptions';
+  String get expiredCustomersTooltip => isArabic
+      ? 'اشتراكات منتهية الصلاحية'
+      : 'Expired subscriptions';
+  String get loadingCustomers => isArabic
+      ? 'جارٍ التحميل...'
+      : 'Loading...';
+  String get noExpiringSubscriptions => isArabic
+      ? 'لا توجد اشتراكات تنتهي خلال 3 أيام.'
+      : 'No subscriptions expiring within 3 days.';
+  String get noExpiredSubscriptions => isArabic
+      ? 'لا توجد اشتراكات منتهية.'
+      : 'No expired subscriptions.';
+  String get failedToLoadCustomers => isArabic
+      ? 'فشل تحميل البيانات. حاول مرة أخرى.'
+      : 'Failed to load data. Please try again.';
+  String get expiringTodayLabel => isArabic
+      ? 'ينتهي اليوم'
+      : 'Expiring Today';
+  String get expiringIn3DaysLabel => isArabic
+      ? 'ينتهي خلال 3 أيام'
+      : 'Expiring in 3 Days';
+  String get todayRevenueLabel => isArabic
+      ? 'إيرادات اليوم'
+      : "Today's Revenue";
+  String get todayTransactionsLabel => isArabic
+      ? 'معاملات اليوم'
+      : "Today's Transactions";
+  String get recentTransactionsLabel => isArabic
+      ? 'آخر المعاملات'
+      : 'Recent Transactions';
+  String get showAllLabel => isArabic ? 'عرض الكل' : 'Show all';
+  String get customersWord => isArabic ? 'عميل' : 'customer';
+  String get customersWordPlural => isArabic ? 'عملاء' : 'customers';
+  String get noTransactionsToday => isArabic
+      ? 'لا توجد معاملات اليوم.'
+      : 'No transactions today.';
+
   String get noTransactionsToExport =>
       isArabic ? 'لا توجد معاملات للتصدير.' : 'No transactions to export.';
   String transactionsExported(int count) => isArabic
@@ -266,6 +351,7 @@ class AppLocalizations {
       'Logout failed.': 'فشل تسجيل الخروج.',
       'Search failed. Please try again.': 'فشل البحث. حاول مرة أخرى.',
       'Unable to add credit right now.': 'تعذر إضافة الرصيد الآن.',
+      'Unable to extend service right now.': 'تعذر تمديد الخدمة الآن.',
       'Unable to load transactions.': 'تعذر تحميل المعاملات.',
       'The transaction response is missing required data.':
           'استجابة المعاملات تفتقد إلى البيانات المطلوبة.',
@@ -280,12 +366,19 @@ class AppLocalizations {
       'Unable to connect to the API server.': 'تعذر الاتصال بخادم الواجهة.',
       'The server returned an unexpected response.':
           'أعاد الخادم استجابة غير متوقعة.',
+      'Session expired. Please sign in again.':
+          'انتهت الجلسة. سجّل الدخول مرة أخرى.',
       'Set API_BASE_URL before using the app.':
           'حدّد API_BASE_URL قبل استخدام التطبيق.',
       'Customer search failed.': 'فشل البحث عن العملاء.',
       'Unable to add credit.': 'تعذر إضافة الرصيد.',
+      'Unable to extend service.': 'تعذر تمديد الخدمة.',
+      'Failed to load data. Please try again.': 'فشل تحميل البيانات. حاول مرة أخرى.',
+      'Customer service ID is required.': 'رقم خدمة العميل مطلوب.',
       'Enter a customer name or mobile number.':
           'أدخل اسم العميل أو رقم الجوال.',
+      'Unauthenticated.': 'غير مصرح. سجّل الدخول مرة أخرى.',
+      'Unauthenticated': 'غير مصرح. سجّل الدخول مرة أخرى.',
       'Invalid credentials': 'بيانات الدخول غير صحيحة',
       'Subscription not found': 'لم يتم العثور على الاشتراك',
       'Source user credit account not found': 'لم يتم العثور على حساب رصيد المستخدم المصدر',
@@ -304,6 +397,7 @@ class AppLocalizations {
   String searchCriteria({
     String? customerName,
     String? mobile,
+    String? serviceFilter,
   }) {
     final parts = <String>[];
     if (customerName != null && customerName.trim().isNotEmpty) {
@@ -314,6 +408,11 @@ class AppLocalizations {
     if (mobile != null && mobile.trim().isNotEmpty) {
       parts.add(
         isArabic ? 'الجوال "$mobile"' : 'mobile "$mobile"',
+      );
+    }
+    if (serviceFilter != null && serviceFilter.trim().isNotEmpty) {
+      parts.add(
+        isArabic ? 'الحالة "$serviceFilter"' : 'status "$serviceFilter"',
       );
     }
     return parts.join(isArabic ? ' و ' : ' and ');

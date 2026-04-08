@@ -9,13 +9,14 @@ import 'core/network/api_client.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/brand_background.dart';
 import 'features/auth/data/api_auth_service.dart';
+import 'features/auth/data/biometric_login_service.dart';
 import 'features/auth/data/auth_service.dart';
 import 'features/auth/data/auth_session_storage.dart';
 import 'features/auth/domain/auth_session.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/customers/data/api_customer_repository.dart';
 import 'features/customers/data/customer_repository.dart';
-import 'features/customers/presentation/customer_search_page.dart';
+import 'features/customers/presentation/dashboard_page.dart';
 import 'features/transactions/data/api_transaction_repository.dart';
 import 'features/transactions/data/transaction_repository.dart';
 
@@ -28,9 +29,12 @@ class GoitResellerApp extends StatefulWidget {
 
 class _GoitResellerAppState extends State<GoitResellerApp>
     with WidgetsBindingObserver {
+  final _authenticatedNavigatorKey = GlobalKey<NavigatorState>();
+  final _unauthenticatedNavigatorKey = GlobalKey<NavigatorState>();
   late final ApiClient _apiClient;
   late final AuthService _authService;
   late final AuthSessionStorage _authSessionStorage;
+  late final BiometricLoginService _biometricLoginService;
   late final CustomerRepository _customerRepository;
   late final TransactionRepository _transactionRepository;
   AuthSession? _session;
@@ -38,6 +42,7 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   Locale? _locale;
   Timer? _sessionExpiryTimer;
   bool _isRestoringSession = true;
+  bool _isClearingSession = false;
 
   @override
   void initState() {
@@ -46,9 +51,11 @@ class _GoitResellerAppState extends State<GoitResellerApp>
     _apiClient = ApiClient(
       baseUrl: ApiConfig.baseUrl,
       httpClient: http.Client(),
+      onUnauthorized: _handleUnauthorized,
     );
     _authService = ApiAuthService(_apiClient);
     _authSessionStorage = AuthSessionStorage();
+    _biometricLoginService = DeviceBiometricLoginService();
     _customerRepository = ApiCustomerRepository(_apiClient);
     _transactionRepository = ApiTransactionRepository(_apiClient);
     unawaited(_restoreSession());
@@ -119,17 +126,26 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   }
 
   Future<void> _expireSession() async {
-    _sessionExpiryTimer?.cancel();
-    await _authSessionStorage.clear();
-
-    if (!mounted) {
+    if (_isClearingSession) {
       return;
     }
 
-    setState(() {
-      _session = null;
-      _sessionExpiresAt = null;
-    });
+    _isClearingSession = true;
+    try {
+      _sessionExpiryTimer?.cancel();
+      await _authSessionStorage.clear();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _session = null;
+        _sessionExpiresAt = null;
+      });
+    } finally {
+      _isClearingSession = false;
+    }
   }
 
   void _handleLoggedIn(AuthSession session) {
@@ -145,6 +161,11 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   }
 
   void _handleLoggedOut() {
+    if (_isClearingSession) {
+      return;
+    }
+
+    _isClearingSession = true;
     _sessionExpiryTimer?.cancel();
 
     setState(() {
@@ -152,7 +173,19 @@ class _GoitResellerAppState extends State<GoitResellerApp>
       _sessionExpiresAt = null;
     });
 
-    unawaited(_authSessionStorage.clear());
+    unawaited(_clearSessionStorage());
+  }
+
+  Future<void> _clearSessionStorage() async {
+    try {
+      await _authSessionStorage.clear();
+    } finally {
+      _isClearingSession = false;
+    }
+  }
+
+  void _handleUnauthorized() {
+    unawaited(_expireSession());
   }
 
   void _changeLocale(Locale locale) {
@@ -211,9 +244,13 @@ class _GoitResellerAppState extends State<GoitResellerApp>
         _session != null &&
         _sessionExpiresAt != null &&
         DateTime.now().isBefore(_sessionExpiresAt!);
+    final navigatorKey = hasActiveSession
+        ? _authenticatedNavigatorKey
+        : _unauthenticatedNavigatorKey;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       locale: _locale,
       onGenerateTitle: (context) => context.l10n.appTitle,
       theme: AppTheme.lightTheme,
@@ -237,11 +274,12 @@ class _GoitResellerAppState extends State<GoitResellerApp>
           : !hasActiveSession
           ? LoginPage(
               authService: _authService,
+              biometricLoginService: _biometricLoginService,
               currentLocale: _currentLocale,
               onLoggedIn: _handleLoggedIn,
               onLocaleChanged: _changeLocale,
             )
-          : CustomerSearchPage(
+          : DashboardPage(
               session: _session!,
               authService: _authService,
               customerRepository: _customerRepository,

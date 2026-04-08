@@ -69,6 +69,8 @@ class CustomerServiceRecord {
   CustomerServiceRecord copyWith({
     double? creditBalance,
     double? debitBalance,
+    String? startDate,
+    String? endDate,
   }) {
     return CustomerServiceRecord(
       id: id,
@@ -80,8 +82,8 @@ class CustomerServiceRecord {
       username: username,
       status: status,
       radiusStatus: radiusStatus,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
       isOnline: isOnline,
       effectivePrice: effectivePrice,
       creditBalance: creditBalance ?? this.creditBalance,

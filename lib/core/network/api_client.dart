@@ -7,11 +7,15 @@ class ApiClient {
   ApiClient({
     required String baseUrl,
     http.Client? httpClient,
+    void Function()? onUnauthorized,
   })  : _baseUrl = baseUrl.trim(),
-        _httpClient = httpClient ?? http.Client();
+        _httpClient = httpClient ?? http.Client(),
+        _onUnauthorized = onUnauthorized;
 
   final String _baseUrl;
   final http.Client _httpClient;
+  final void Function()? _onUnauthorized;
+  bool _isNotifyingUnauthorized = false;
 
   Future<ApiResponse> get(
     String path, {
@@ -29,12 +33,14 @@ class ApiClient {
   Future<ApiResponse> post(
     String path, {
     String? authorization,
+    Map<String, String?> queryParameters = const {},
     Map<String, dynamic>? body,
   }) {
     return _send(
       method: 'POST',
       path: path,
       authorization: authorization,
+      queryParameters: queryParameters,
       body: body,
     );
   }
@@ -63,6 +69,9 @@ class ApiClient {
     if (authorization != null && authorization.trim().isNotEmpty) {
       headers['Authorization'] = authorization;
     }
+
+    final hasAuthorization =
+        authorization != null && authorization.trim().isNotEmpty;
 
     if (body != null) {
       headers['Content-Type'] = 'application/json';
@@ -93,6 +102,18 @@ class ApiClient {
       }
 
       if (response.body.trim().isEmpty) {
+        if (_isUnauthorizedResponse(
+          statusCode: response.statusCode,
+          data: const <String, dynamic>{},
+          hasAuthorization: hasAuthorization,
+        )) {
+          _notifyUnauthorized();
+          throw ApiUnauthorizedException(
+            'Session expired. Please sign in again.',
+            statusCode: response.statusCode,
+          );
+        }
+
         return ApiResponse(
           statusCode: response.statusCode,
           data: const <String, dynamic>{},
@@ -107,9 +128,22 @@ class ApiClient {
         );
       }
 
+      final data = Map<String, dynamic>.from(decodedBody);
+      if (_isUnauthorizedResponse(
+        statusCode: response.statusCode,
+        data: data,
+        hasAuthorization: hasAuthorization,
+      )) {
+        _notifyUnauthorized();
+        throw ApiUnauthorizedException(
+          _resolveUnauthorizedMessage(data),
+          statusCode: response.statusCode,
+        );
+      }
+
       return ApiResponse(
         statusCode: response.statusCode,
-        data: Map<String, dynamic>.from(decodedBody),
+        data: data,
       );
     } on TimeoutException {
       throw const ApiException('The request timed out.');
@@ -120,6 +154,54 @@ class ApiClient {
     } catch (_) {
       throw const ApiException('Unable to connect to the API server.');
     }
+  }
+
+  bool _isUnauthorizedResponse({
+    required int statusCode,
+    required Map<String, dynamic> data,
+    required bool hasAuthorization,
+  }) {
+    if (!hasAuthorization) {
+      return false;
+    }
+
+    if (statusCode == 401 || statusCode == 403) {
+      return true;
+    }
+
+    final message = data['message']?.toString().trim().toLowerCase() ?? '';
+    if (message.isEmpty) {
+      return false;
+    }
+
+    return message.contains('unauthenticated') ||
+        message.contains('unauthorized') ||
+        message.contains('invalid token') ||
+        message.contains('token expired') ||
+        message.contains('session expired');
+  }
+
+  String _resolveUnauthorizedMessage(Map<String, dynamic> data) {
+    final message = data['message']?.toString().trim();
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+    return 'Session expired. Please sign in again.';
+  }
+
+  void _notifyUnauthorized() {
+    if (_isNotifyingUnauthorized) {
+      return;
+    }
+
+    _isNotifyingUnauthorized = true;
+    scheduleMicrotask(() {
+      try {
+        _onUnauthorized?.call();
+      } finally {
+        _isNotifyingUnauthorized = false;
+      }
+    });
   }
 
   Uri _buildUri(
@@ -164,4 +246,8 @@ class ApiException implements Exception {
 
   final String message;
   final int? statusCode;
+}
+
+class ApiUnauthorizedException extends ApiException {
+  const ApiUnauthorizedException(super.message, {super.statusCode});
 }
