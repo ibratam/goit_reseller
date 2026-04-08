@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/brand_background.dart';
 import '../../../core/widgets/language_menu_button.dart';
+import '../../../core/widgets/theme_mode_toggle_button.dart';
 import '../../auth/data/auth_service.dart';
 import '../../auth/domain/auth_session.dart';
 import '../data/customer_repository.dart';
@@ -27,6 +29,7 @@ class CustomerSearchPage extends StatefulWidget {
     required this.onLoggedOut,
     required this.onRefreshCurrentUser,
     required this.onLocaleChanged,
+    required this.onThemeToggle,
     super.key,
   });
 
@@ -38,6 +41,7 @@ class CustomerSearchPage extends StatefulWidget {
   final VoidCallback onLoggedOut;
   final Future<void> Function() onRefreshCurrentUser;
   final ValueChanged<Locale> onLocaleChanged;
+  final ValueChanged<Brightness> onThemeToggle;
 
   @override
   State<CustomerSearchPage> createState() => _CustomerSearchPageState();
@@ -103,9 +107,8 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         session: widget.session,
         customerName: customerName.isEmpty ? null : customerName,
         mobile: mobile.isEmpty ? null : mobile,
-        expired: _serviceStatusFilter == _ServiceStatusFilter.expired
-            ? true
-            : null,
+        expired:
+            _serviceStatusFilter == _ServiceStatusFilter.expired ? true : null,
         expiresInDays: _serviceStatusFilter == _ServiceStatusFilter.expiringSoon
             ? 3
             : null,
@@ -289,6 +292,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         builder: (_) => TransactionsPage(
           currentLocale: widget.currentLocale,
           onLocaleChanged: widget.onLocaleChanged,
+          onThemeToggle: widget.onThemeToggle,
           session: widget.session,
           transactionRepository: widget.transactionRepository,
         ),
@@ -320,7 +324,8 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     );
   }
 
-  Drawer _buildDrawer(BuildContext context, AppLocalizations l10n, dynamic user) {
+  Drawer _buildDrawer(
+      BuildContext context, AppLocalizations l10n, dynamic user) {
     return Drawer(
       child: SafeArea(
         child: ListView(
@@ -358,6 +363,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                       onLoggedOut: widget.onLoggedOut,
                       onRefreshCurrentUser: widget.onRefreshCurrentUser,
                       onLocaleChanged: widget.onLocaleChanged,
+                      onThemeToggle: widget.onThemeToggle,
                     ),
                   ),
                 );
@@ -512,6 +518,9 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       appBar: AppBar(
         title: Text(l10n.customerSearchTitle),
         actions: [
+          ThemeModeToggleButton(
+            onToggle: widget.onThemeToggle,
+          ),
           LanguageMenuButton(
             currentLocale: widget.currentLocale,
             onLocaleChanged: widget.onLocaleChanged,
@@ -540,10 +549,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 padding: const EdgeInsets.all(24),
                 children: [
                   Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: const BorderSide(color: Color(0xFFE5E7EB)),
-                    ),
+                    shape: theme.appCardShape(),
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: LayoutBuilder(

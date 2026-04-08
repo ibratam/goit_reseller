@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 class AppBranding {
   static const String logoAsset = 'assets/images/gowifi_logo.png';
 }
@@ -33,18 +35,11 @@ class BrandedBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF8FAFD),
-            Color(0xFFEAF2FB),
-            Color(0xFFF6F9FD),
-          ],
-          stops: [0, 0.55, 1],
-        ),
+      decoration: BoxDecoration(
+        gradient: theme.appBackgroundGradient,
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -91,6 +86,8 @@ class _BackgroundLogoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Transform.rotate(
       angle: angle,
       child: Opacity(
@@ -98,9 +95,9 @@ class _BackgroundLogoCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.appBackdropCardColor,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFFD7E3F0)),
+            border: Border.all(color: theme.appBackdropBorderColor),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x120F172A),

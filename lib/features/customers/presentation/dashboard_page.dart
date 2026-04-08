@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/brand_background.dart';
 import '../../../core/widgets/language_menu_button.dart';
+import '../../../core/widgets/theme_mode_toggle_button.dart';
 import '../../auth/data/auth_service.dart';
 import '../../auth/domain/app_user.dart';
 import '../../auth/domain/auth_session.dart';
@@ -27,6 +29,7 @@ class DashboardPage extends StatefulWidget {
     required this.onLoggedOut,
     required this.onRefreshCurrentUser,
     required this.onLocaleChanged,
+    required this.onThemeToggle,
     super.key,
   });
 
@@ -38,6 +41,7 @@ class DashboardPage extends StatefulWidget {
   final VoidCallback onLoggedOut;
   final Future<void> Function() onRefreshCurrentUser;
   final ValueChanged<Locale> onLocaleChanged;
+  final ValueChanged<Brightness> onThemeToggle;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -76,12 +80,11 @@ class _DashboardPageState extends State<DashboardPage> {
           session: widget.session,
           expired: true,
           limit: 1000,
-      
         ),
         widget.customerRepository.searchCustomers(
           session: widget.session,
           expiresInDays: 3,
-          limit:1000,
+          limit: 1000,
         ),
         widget.transactionRepository.fetchTransactions(
           session: widget.session,
@@ -164,8 +167,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
     try {
       await widget.authService.logout(widget.session);
-    } catch (_) {}
-    finally {
+    } catch (_) {
+    } finally {
       if (mounted) widget.onLoggedOut();
     }
   }
@@ -187,6 +190,9 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(
         title: Text(l10n.dashboardTitle),
         actions: [
+          ThemeModeToggleButton(
+            onToggle: widget.onThemeToggle,
+          ),
           LanguageMenuButton(
             currentLocale: widget.currentLocale,
             onLocaleChanged: widget.onLocaleChanged,
@@ -216,7 +222,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       child: Padding(
                         padding: EdgeInsets.all(48),
                         child: CircularProgressIndicator(),
-                        ),
+                      ),
                     )
                   : _errorText != null
                       ? _buildError(l10n)
@@ -243,9 +249,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F8F6),
+        color: theme.appPanelColor,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: const Color(0xFFDCE5E1)),
+        border: Border.all(color: theme.appPanelBorderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x120F172A),
@@ -263,14 +269,14 @@ class _DashboardPageState extends State<DashboardPage> {
               user.name.isEmpty ? user.username : user.name,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1F2937),
+                color: theme.appStrongTextColor,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.signedInAs(signedInAsValue),
               style: theme.textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF677484),
+                color: theme.appMutedTextColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -286,7 +292,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 const spacing = 12.0;
                 final tileWidth =
                     (availableWidth - (spacing * (columnCount - 1))) /
-                    columnCount;
+                        columnCount;
 
                 return Wrap(
                   spacing: spacing,
@@ -429,10 +435,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildRecentTransactions(ThemeData theme, AppLocalizations l10n) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
-      ),
+      shape: theme.appCardShape(),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -462,7 +465,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Text(
                     l10n.noTransactionsToday,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF6B7280),
+                      color: theme.appSubtleTextColor,
                     ),
                   ),
                 ),
@@ -483,6 +486,7 @@ class _DashboardPageState extends State<DashboardPage> {
         builder: (_) => TransactionsPage(
           currentLocale: widget.currentLocale,
           onLocaleChanged: widget.onLocaleChanged,
+          onThemeToggle: widget.onThemeToggle,
           session: widget.session,
           transactionRepository: widget.transactionRepository,
         ),
@@ -495,10 +499,7 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: const EdgeInsets.all(24),
       children: [
         Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
+          shape: Theme.of(context).appCardShape(),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -510,7 +511,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   l10n.localizeDynamicMessage(_errorText!),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF4B5563),
+                        color: Theme.of(context).appMutedTextColor,
                       ),
                 ),
                 const SizedBox(height: 20),
@@ -568,6 +569,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       onLoggedOut: widget.onLoggedOut,
                       onRefreshCurrentUser: widget.onRefreshCurrentUser,
                       onLocaleChanged: widget.onLocaleChanged,
+                      onThemeToggle: widget.onThemeToggle,
                     ),
                   ),
                 );
@@ -615,6 +617,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     builder: (_) => TransactionsPage(
                       currentLocale: widget.currentLocale,
                       onLocaleChanged: widget.onLocaleChanged,
+                      onThemeToggle: widget.onThemeToggle,
                       session: widget.session,
                       transactionRepository: widget.transactionRepository,
                     ),
@@ -673,10 +676,7 @@ class _StatCard extends StatelessWidget {
         final compact = constraints.maxWidth < 150;
 
         return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
+          shape: theme.appCardShape(),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(20),
@@ -697,7 +697,7 @@ class _StatCard extends StatelessWidget {
                       maxLines: compact ? 3 : 4,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF6B7280),
+                        color: theme.appSubtleTextColor,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
                       ),
@@ -712,9 +712,9 @@ class _StatCard extends StatelessWidget {
                                 ? theme.textTheme.titleLarge
                                 : theme.textTheme.headlineSmall)
                             ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF111827),
-                            ),
+                          fontWeight: FontWeight.w800,
+                          color: theme.appStrongTextColor,
+                        ),
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -724,7 +724,7 @@ class _StatCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF9CA3AF),
+                          color: theme.appFaintTextColor,
                         ),
                       ),
                     ],
@@ -756,7 +756,7 @@ class _DashboardInfoTile extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFFDFEFD),
+        color: theme.appSoftSurfaceColor,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(
@@ -776,7 +776,7 @@ class _DashboardInfoTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1F2937),
+                      color: theme.appStrongTextColor,
                     ),
                   ),
                 ),
@@ -789,7 +789,7 @@ class _DashboardInfoTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF374151),
+                color: theme.appMutedTextColor,
               ),
             ),
           ],
@@ -830,7 +830,7 @@ class _TransactionTile extends StatelessWidget {
                       Text(
                         transaction.resolvedToName!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF6B7280),
+                          color: theme.appSubtleTextColor,
                         ),
                       ),
                   ],
@@ -857,21 +857,21 @@ class _TransactionTile extends StatelessWidget {
                   Text(
                     l10n.localizeValue(transaction.operationType!),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF9CA3AF),
+                      color: theme.appFaintTextColor,
                     ),
                   ),
                 if (transaction.paymentMethod != null)
                   Text(
                     l10n.localizeValue(transaction.paymentMethod!),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF9CA3AF),
+                      color: theme.appFaintTextColor,
                     ),
                   ),
                 if (transaction.createdAt != null)
                   Text(
                     transaction.createdAt!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF9CA3AF),
+                      color: theme.appFaintTextColor,
                     ),
                   ),
               ],

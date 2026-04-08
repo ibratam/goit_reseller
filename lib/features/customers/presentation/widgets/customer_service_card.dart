@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/customer_service_record.dart';
 
@@ -23,10 +24,7 @@ class CustomerServiceCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
-      ),
+      shape: theme.appCardShape(),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -49,7 +47,7 @@ class CustomerServiceCard extends StatelessWidget {
                       ? record.subscriptionName
                       : '${record.service.name} \u2022 ${record.subscriptionName}',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: const Color(0xFF4B5563),
+                    color: theme.appMutedTextColor,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -188,7 +186,7 @@ class DetailChip extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 280),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: theme.appSoftSurfaceColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -271,10 +269,7 @@ class EmptyStateCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
-      ),
+      shape: theme.appCardShape(),
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
@@ -296,7 +291,7 @@ class EmptyStateCard extends StatelessWidget {
               description,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF4B5563),
+                color: theme.appMutedTextColor,
                 height: 1.5,
               ),
             ),

@@ -30,8 +30,7 @@ class AppLocalizations {
   ];
 
   String get appTitle => isArabic ? 'GoWIFI للموزعين' : 'GoWIFI Reseller';
-  String get loginTitle =>
-      isArabic ? 'تسجيل دخول ' : 'Login';
+  String get loginTitle => isArabic ? 'تسجيل دخول ' : 'Login';
   String get loginSubtitle => isArabic
       ? 'سجّل الدخول للبحث عن العملاء بالاسم أو رقم الجوال.'
       : 'Sign in to search customers by mobile number or name.';
@@ -70,8 +69,13 @@ class AppLocalizations {
       : 'Saved biometric sign-in details are no longer valid. Sign in with your password again.';
   String get changeLanguageTooltip =>
       isArabic ? 'تغيير اللغة' : 'Change language';
-  String get loginFailedTryAgain =>
-      isArabic ? 'فشل تسجيل الدخول. حاول مرة أخرى.' : 'Login failed. Please try again.';
+  String get switchToDarkModeTooltip =>
+      isArabic ? 'التبديل إلى الوضع الداكن' : 'Switch to dark mode';
+  String get switchToLightModeTooltip =>
+      isArabic ? 'التبديل إلى الوضع الفاتح' : 'Switch to light mode';
+  String get loginFailedTryAgain => isArabic
+      ? 'فشل تسجيل الدخول. حاول مرة أخرى.'
+      : 'Login failed. Please try again.';
   String loginApiConfigured(String deviceName) => isArabic
       ? 'يتم استخدام واجهة تسجيل الدخول الحية. سيتم إرسال device_name بالقيمة "$deviceName".'
       : 'Using the live login API. The request sends device_name as "$deviceName".';
@@ -81,20 +85,13 @@ class AppLocalizations {
 
   String get customerSearchTitle =>
       isArabic ? 'بحث العملاء' : 'Customer Search';
-  String get dashboardTitle =>
-      isArabic ? 'لوحة التحكم' : 'Dashboard';
-  String get navMenuTooltip =>
-      isArabic ? 'القائمة' : 'Menu';
-  String get transactionsTitle =>
-      isArabic ? 'معاملاتي' : 'My Transactions';
-  String get myTransactionsTooltip =>
-      isArabic ? 'معاملاتي' : 'My transactions';
-  String get refreshUserTooltip =>
-      isArabic ? 'تحديث المستخدم' : 'Refresh user';
-  String get logoutTooltip =>
-      isArabic ? 'تسجيل الخروج' : 'Logout';
-  String get notConfigured =>
-      isArabic ? 'غير مهيأ' : 'Not configured';
+  String get dashboardTitle => isArabic ? 'لوحة التحكم' : 'Dashboard';
+  String get navMenuTooltip => isArabic ? 'القائمة' : 'Menu';
+  String get transactionsTitle => isArabic ? 'معاملاتي' : 'My Transactions';
+  String get myTransactionsTooltip => isArabic ? 'معاملاتي' : 'My transactions';
+  String get refreshUserTooltip => isArabic ? 'تحديث المستخدم' : 'Refresh user';
+  String get logoutTooltip => isArabic ? 'تسجيل الخروج' : 'Logout';
+  String get notConfigured => isArabic ? 'غير مهيأ' : 'Not configured';
   String signedInAs(String username) =>
       isArabic ? 'مسجل الدخول باسم $username' : 'Signed in as $username';
   String get userIdLabel => isArabic ? 'رقم المستخدم' : 'User ID';
@@ -110,19 +107,17 @@ class AppLocalizations {
       : 'Search with customer name, mobile number, or both. Results come from /api/customers/services/search.';
   String get serviceStatusFilterLabel =>
       isArabic ? 'تصفية حالة الخدمة' : 'Service status';
-  String get customerNameLabel =>
-      isArabic ? 'اسم العميل' : 'Customer name';
-  String get mobileNumberLabel =>
-      isArabic ? 'رقم الجوال' : 'Mobile number';
+  String get customerNameLabel => isArabic ? 'اسم العميل' : 'Customer name';
+  String get mobileNumberLabel => isArabic ? 'رقم الجوال' : 'Mobile number';
   String get search => isArabic ? 'بحث' : 'Search';
   String get enterCustomerNameOrMobileOrBoth => isArabic
       ? 'أدخل اسم العميل أو رقم الجوال أو كليهما.'
       : 'Enter a customer name, a mobile number, or both.';
-  String get searchFailedTryAgain =>
-      isArabic ? 'فشل البحث. حاول مرة أخرى.' : 'Search failed. Please try again.';
-  String get unableToRefreshAccount => isArabic
-      ? 'تعذر تحديث حسابك.'
-      : 'Unable to refresh your account.';
+  String get searchFailedTryAgain => isArabic
+      ? 'فشل البحث. حاول مرة أخرى.'
+      : 'Search failed. Please try again.';
+  String get unableToRefreshAccount =>
+      isArabic ? 'تعذر تحديث حسابك.' : 'Unable to refresh your account.';
   String transactionCompleted(int number, String balance) => isArabic
       ? 'تمت العملية $number. الرصيد الدائن الجديد: $balance'
       : 'Transaction $number completed. New credit balance: $balance';
@@ -130,8 +125,7 @@ class AppLocalizations {
   String get noSearchYetDescription => isArabic
       ? 'أدخل اسم العميل أو رقم الجوال أو كليهما لعرض الاشتراكات المطابقة.'
       : 'Enter a customer name, mobile number, or both to see matching subscriptions.';
-  String get noResultsFound =>
-      isArabic ? 'لا توجد نتائج' : 'No results found';
+  String get noResultsFound => isArabic ? 'لا توجد نتائج' : 'No results found';
   String noSubscriptionMatched(String criteria) => isArabic
       ? 'لا يوجد اشتراك يطابق $criteria. تحقق من القيم وحاول مرة أخرى.'
       : 'No subscription matched $criteria. Check the values and try again.';
@@ -139,16 +133,13 @@ class AppLocalizations {
       isArabic ? '$count نتيجة' : '$count result${count == 1 ? '' : 's'}';
   String get subscriptionIdLabel =>
       isArabic ? 'رقم الاشتراك' : 'Subscription ID';
-  String get customerIdLabel =>
-      isArabic ? 'رقم العميل' : 'Customer ID';
-  String get usernameFieldLabel =>
-      isArabic ? 'اسم المستخدم' : 'Username';
+  String get customerIdLabel => isArabic ? 'رقم العميل' : 'Customer ID';
+  String get usernameFieldLabel => isArabic ? 'اسم المستخدم' : 'Username';
   String get priceLabel => isArabic ? 'السعر' : 'Price';
   String get startLabel => isArabic ? 'البداية' : 'Start';
   String get endLabel => isArabic ? 'النهاية' : 'End';
   String get addCredit => isArabic ? 'إضافة رصيد' : 'Add Credit';
-  String get addCreditTitle =>
-      isArabic ? 'إضافة رصيد' : 'Add Credit';
+  String get addCreditTitle => isArabic ? 'إضافة رصيد' : 'Add Credit';
   String get extendServiceAction =>
       isArabic ? 'تمديد الخدمة' : 'Extend Service';
   String serviceExtendedUntil(String endDate) => isArabic
@@ -157,13 +148,11 @@ class AppLocalizations {
   String get amountLabel => isArabic ? 'المبلغ' : 'Amount';
   String get enterValidAmount =>
       isArabic ? 'أدخل مبلغًا صحيحًا' : 'Enter a valid amount';
-  String get paymentMethodLabel =>
-      isArabic ? 'طريقة الدفع' : 'Payment method';
+  String get paymentMethodLabel => isArabic ? 'طريقة الدفع' : 'Payment method';
   String get cashLabel => isArabic ? 'نقدي' : 'Cash';
   String get chequeLabel => isArabic ? 'شيك' : 'Cheque';
-  String get chequeDateLabel => isArabic
-      ? 'تاريخ الشيك (YYYY-MM-DD)'
-      : 'Cheque date (YYYY-MM-DD)';
+  String get chequeDateLabel =>
+      isArabic ? 'تاريخ الشيك (YYYY-MM-DD)' : 'Cheque date (YYYY-MM-DD)';
   String get enterChequeDate =>
       isArabic ? 'أدخل تاريخ الشيك' : 'Enter the cheque date';
   String get noteLabel => isArabic ? 'ملاحظة' : 'Note';
@@ -171,60 +160,47 @@ class AppLocalizations {
   String get submit => isArabic ? 'إرسال' : 'Submit';
   String get unableToAddCredit =>
       isArabic ? 'تعذر إضافة الرصيد الآن.' : 'Unable to add credit right now.';
-  String get unableToExtendService =>
-      isArabic ? 'تعذر تمديد الخدمة الآن.' : 'Unable to extend service right now.';
-  String get apiRechargeNote =>
-      isArabic ? 'شحن عبر الواجهة' : 'API recharge';
+  String get unableToExtendService => isArabic
+      ? 'تعذر تمديد الخدمة الآن.'
+      : 'Unable to extend service right now.';
+  String get apiRechargeNote => isArabic ? 'شحن عبر الواجهة' : 'API recharge';
 
   String get filterTransactions =>
       isArabic ? 'تصفية المعاملات' : 'Filter transactions';
   String get exportTransactionsTooltip =>
       isArabic ? 'تصدير إلى إكسل' : 'Export to Excel';
-  String get expiringCustomersTitle => isArabic
-      ? 'اشتراكات تنتهي قريبًا'
-      : 'Expiring Subscriptions';
+  String get expiringCustomersTitle =>
+      isArabic ? 'اشتراكات تنتهي قريبًا' : 'Expiring Subscriptions';
   String get expiringCustomersTooltip => isArabic
       ? 'اشتراكات تنتهي خلال 3 أيام'
       : 'Subscriptions expiring within 3 days';
-  String get expiredCustomersTitle => isArabic
-      ? 'اشتراكات منتهية'
-      : 'Expired Subscriptions';
-  String get expiredCustomersTooltip => isArabic
-      ? 'اشتراكات منتهية الصلاحية'
-      : 'Expired subscriptions';
-  String get loadingCustomers => isArabic
-      ? 'جارٍ التحميل...'
-      : 'Loading...';
+  String get expiredCustomersTitle =>
+      isArabic ? 'اشتراكات منتهية' : 'Expired Subscriptions';
+  String get expiredCustomersTooltip =>
+      isArabic ? 'اشتراكات منتهية الصلاحية' : 'Expired subscriptions';
+  String get loadingCustomers => isArabic ? 'جارٍ التحميل...' : 'Loading...';
   String get noExpiringSubscriptions => isArabic
       ? 'لا توجد اشتراكات تنتهي خلال 3 أيام.'
       : 'No subscriptions expiring within 3 days.';
-  String get noExpiredSubscriptions => isArabic
-      ? 'لا توجد اشتراكات منتهية.'
-      : 'No expired subscriptions.';
+  String get noExpiredSubscriptions =>
+      isArabic ? 'لا توجد اشتراكات منتهية.' : 'No expired subscriptions.';
   String get failedToLoadCustomers => isArabic
       ? 'فشل تحميل البيانات. حاول مرة أخرى.'
       : 'Failed to load data. Please try again.';
-  String get expiringTodayLabel => isArabic
-      ? 'ينتهي اليوم'
-      : 'Expiring Today';
-  String get expiringIn3DaysLabel => isArabic
-      ? 'ينتهي خلال 3 أيام'
-      : 'Expiring in 3 Days';
-  String get todayRevenueLabel => isArabic
-      ? 'إيرادات اليوم'
-      : "Today's Revenue";
-  String get todayTransactionsLabel => isArabic
-      ? 'معاملات اليوم'
-      : "Today's Transactions";
-  String get recentTransactionsLabel => isArabic
-      ? 'آخر المعاملات'
-      : 'Recent Transactions';
+  String get expiringTodayLabel => isArabic ? 'ينتهي اليوم' : 'Expiring Today';
+  String get expiringIn3DaysLabel =>
+      isArabic ? 'ينتهي خلال 3 أيام' : 'Expiring in 3 Days';
+  String get todayRevenueLabel =>
+      isArabic ? 'إيرادات اليوم' : "Today's Revenue";
+  String get todayTransactionsLabel =>
+      isArabic ? 'معاملات اليوم' : "Today's Transactions";
+  String get recentTransactionsLabel =>
+      isArabic ? 'آخر المعاملات' : 'Recent Transactions';
   String get showAllLabel => isArabic ? 'عرض الكل' : 'Show all';
   String get customersWord => isArabic ? 'عميل' : 'customer';
   String get customersWordPlural => isArabic ? 'عملاء' : 'customers';
-  String get noTransactionsToday => isArabic
-      ? 'لا توجد معاملات اليوم.'
-      : 'No transactions today.';
+  String get noTransactionsToday =>
+      isArabic ? 'لا توجد معاملات اليوم.' : 'No transactions today.';
 
   String get noTransactionsToExport =>
       isArabic ? 'لا توجد معاملات للتصدير.' : 'No transactions to export.';
@@ -243,10 +219,8 @@ class AppLocalizations {
   String get transactionTypeLabel =>
       isArabic ? 'نوع المعاملة' : 'Transaction type';
   String get allLabel => isArabic ? 'الكل' : 'All';
-  String get operationTypeLabel =>
-      isArabic ? 'نوع العملية' : 'Operation type';
-  String get startDateLabel =>
-      isArabic ? 'تاريخ البداية' : 'Start date';
+  String get operationTypeLabel => isArabic ? 'نوع العملية' : 'Operation type';
+  String get startDateLabel => isArabic ? 'تاريخ البداية' : 'Start date';
   String get endDateLabel => isArabic ? 'تاريخ النهاية' : 'End date';
   String get apply => isArabic ? 'تطبيق' : 'Apply';
   String get clear => isArabic ? 'مسح' : 'Clear';
@@ -264,24 +238,18 @@ class AppLocalizations {
       : 'The server did not return a usable transaction list.';
   String get previous => isArabic ? 'السابق' : 'Previous';
   String get next => isArabic ? 'التالي' : 'Next';
-  String transactionNumber(int number) => isArabic
-      ? 'المعاملة رقم $number'
-      : 'Transaction #$number';
+  String transactionNumber(int number) =>
+      isArabic ? 'المعاملة رقم $number' : 'Transaction #$number';
   String get amountChipLabel => isArabic ? 'المبلغ' : 'Amount';
   String get fromLabel => isArabic ? 'من' : 'From';
   String get toLabel => isArabic ? 'إلى' : 'To';
-  String get transfersLabel =>
-      isArabic ? 'التحويلات' : 'Transfers';
+  String get transfersLabel => isArabic ? 'التحويلات' : 'Transfers';
   String get balanceLabel => isArabic ? 'الرصيد' : 'Balance';
-  String get lastBalanceLabel =>
-      isArabic ? 'الرصيد السابق' : 'Last balance';
+  String get lastBalanceLabel => isArabic ? 'الرصيد السابق' : 'Last balance';
   String get operationLabel => isArabic ? 'العملية' : 'Operation';
-  String get chequeDateShortLabel =>
-      isArabic ? 'تاريخ الشيك' : 'Cheque date';
-  String get fromAccountTitle =>
-      isArabic ? 'من الحساب' : 'From account';
-  String get toAccountTitle =>
-      isArabic ? 'إلى الحساب' : 'To account';
+  String get chequeDateShortLabel => isArabic ? 'تاريخ الشيك' : 'Cheque date';
+  String get fromAccountTitle => isArabic ? 'من الحساب' : 'From account';
+  String get toAccountTitle => isArabic ? 'إلى الحساب' : 'To account';
   String get noAccountDetails =>
       isArabic ? 'لا توجد بيانات حساب' : 'No account details';
   String accountTypeLabel(String value) =>
@@ -290,10 +258,8 @@ class AppLocalizations {
       isArabic ? 'الطبيعة: $value' : 'Nature: $value';
   String transferAmount(String amount) =>
       isArabic ? 'المبلغ: $amount' : 'Amount: $amount';
-  String transferFrom(String value) =>
-      isArabic ? 'من: $value' : 'From: $value';
-  String transferTo(String value) =>
-      isArabic ? 'إلى: $value' : 'To: $value';
+  String transferFrom(String value) => isArabic ? 'من: $value' : 'From: $value';
+  String transferTo(String value) => isArabic ? 'إلى: $value' : 'To: $value';
 
   String languageOptionLabel(String languageCode) {
     switch (languageCode.toLowerCase()) {
@@ -373,7 +339,8 @@ class AppLocalizations {
       'Customer search failed.': 'فشل البحث عن العملاء.',
       'Unable to add credit.': 'تعذر إضافة الرصيد.',
       'Unable to extend service.': 'تعذر تمديد الخدمة.',
-      'Failed to load data. Please try again.': 'فشل تحميل البيانات. حاول مرة أخرى.',
+      'Failed to load data. Please try again.':
+          'فشل تحميل البيانات. حاول مرة أخرى.',
       'Customer service ID is required.': 'رقم خدمة العميل مطلوب.',
       'Enter a customer name or mobile number.':
           'أدخل اسم العميل أو رقم الجوال.',
@@ -381,7 +348,8 @@ class AppLocalizations {
       'Unauthenticated': 'غير مصرح. سجّل الدخول مرة أخرى.',
       'Invalid credentials': 'بيانات الدخول غير صحيحة',
       'Subscription not found': 'لم يتم العثور على الاشتراك',
-      'Source user credit account not found': 'لم يتم العثور على حساب رصيد المستخدم المصدر',
+      'Source user credit account not found':
+          'لم يتم العثور على حساب رصيد المستخدم المصدر',
       'Customer service accounts not ready': 'حسابات خدمة العميل غير جاهزة',
       'Insufficient source balance': 'رصيد المصدر غير كاف',
       'Error': 'خطأ',
@@ -426,8 +394,7 @@ class _AppLocalizationsDelegate
   @override
   bool isSupported(Locale locale) {
     return AppLocalizations.supportedLocales.any(
-      (supportedLocale) =>
-          supportedLocale.languageCode == locale.languageCode,
+      (supportedLocale) => supportedLocale.languageCode == locale.languageCode,
     );
   }
 

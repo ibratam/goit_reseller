@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/brand_background.dart';
 import '../../auth/domain/auth_session.dart';
 import '../data/customer_repository.dart';
@@ -47,7 +48,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
       final results = await widget.customerRepository.searchCustomers(
         session: widget.session,
         expired: widget.filter == CustomerListFilter.expired ? true : null,
-        expiresInDays: widget.filter == CustomerListFilter.expiringSoon ? 3 : null,
+        expiresInDays:
+            widget.filter == CustomerListFilter.expiringSoon ? 3 : null,
         limit: 100,
       );
 
@@ -108,7 +110,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          SnackBar(content: Text(l10n.serviceExtendedUntil(result.endExtendedDate))),
+          SnackBar(
+              content: Text(l10n.serviceExtendedUntil(result.endExtendedDate))),
         );
     } on CustomerSearchException catch (error) {
       if (!mounted) return;
@@ -184,10 +187,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       padding: const EdgeInsets.all(24),
       children: [
         Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
+          shape: Theme.of(context).appCardShape(),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -202,7 +202,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                   l10n.localizeDynamicMessage(_errorText!),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF4B5563),
+                        color: Theme.of(context).appMutedTextColor,
                       ),
                 ),
                 const SizedBox(height: 20),
@@ -231,10 +231,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       padding: const EdgeInsets.all(24),
       children: [
         Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
+          shape: Theme.of(context).appCardShape(),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(

@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/brand_background.dart';
-import '../data/biometric_login_service.dart';
 import '../../../core/widgets/language_menu_button.dart';
+import '../../../core/widgets/theme_mode_toggle_button.dart';
 import '../data/auth_service.dart';
+import '../data/biometric_login_service.dart';
 import '../domain/auth_session.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,6 +18,7 @@ class LoginPage extends StatefulWidget {
     required this.currentLocale,
     required this.onLoggedIn,
     required this.onLocaleChanged,
+    required this.onThemeToggle,
     super.key,
   });
 
@@ -24,6 +27,7 @@ class LoginPage extends StatefulWidget {
   final Locale currentLocale;
   final ValueChanged<AuthSession> onLoggedIn;
   final ValueChanged<Locale> onLocaleChanged;
+  final ValueChanged<Brightness> onThemeToggle;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -245,9 +249,17 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    LanguageMenuButton(
-                      currentLocale: widget.currentLocale,
-                      onLocaleChanged: widget.onLocaleChanged,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ThemeModeToggleButton(
+                          onToggle: widget.onThemeToggle,
+                        ),
+                        LanguageMenuButton(
+                          currentLocale: widget.currentLocale,
+                          onLocaleChanged: widget.onLocaleChanged,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     const Center(
@@ -255,10 +267,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
                     Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
+                      shape: theme.appCardShape(),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Form(
@@ -270,14 +279,14 @@ class _LoginPageState extends State<LoginPage> {
                                 l10n.loginTitle,
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF111827),
+                                  color: theme.appStrongTextColor,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 l10n.loginSubtitle,
                                 style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: const Color(0xFF4B5563),
+                                  color: theme.appMutedTextColor,
                                 ),
                               ),
                               const SizedBox(height: 24),
@@ -326,9 +335,10 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               const SizedBox(height: 24),
                               ElevatedButton(
-                                onPressed: _isSubmitting || _isBiometricSubmitting
-                                    ? null
-                                    : _submit,
+                                onPressed:
+                                    _isSubmitting || _isBiometricSubmitting
+                                        ? null
+                                        : _submit,
                                 child: _isSubmitting
                                     ? const SizedBox(
                                         height: 20,

@@ -7,6 +7,7 @@ import 'core/config/api_config.dart';
 import 'core/localization/app_localizations.dart';
 import 'core/network/api_client.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_storage.dart';
 import 'core/widgets/brand_background.dart';
 import 'features/auth/data/api_auth_service.dart';
 import 'features/auth/data/biometric_login_service.dart';
@@ -37,9 +38,11 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   late final BiometricLoginService _biometricLoginService;
   late final CustomerRepository _customerRepository;
   late final TransactionRepository _transactionRepository;
+  late final ThemeModeStorage _themeModeStorage;
   AuthSession? _session;
   DateTime? _sessionExpiresAt;
   Locale? _locale;
+  ThemeMode _themeMode = ThemeMode.system;
   Timer? _sessionExpiryTimer;
   bool _isRestoringSession = true;
   bool _isClearingSession = false;
@@ -58,6 +61,7 @@ class _GoitResellerAppState extends State<GoitResellerApp>
     _biometricLoginService = DeviceBiometricLoginService();
     _customerRepository = ApiCustomerRepository(_apiClient);
     _transactionRepository = ApiTransactionRepository(_apiClient);
+    _themeModeStorage = ThemeModeStorage();
     unawaited(_restoreSession());
   }
 
@@ -77,7 +81,12 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   }
 
   Future<void> _restoreSession() async {
-    final storedSession = await _authSessionStorage.loadSession();
+    final restoredState = await Future.wait<Object?>([
+      _authSessionStorage.loadSession(),
+      _themeModeStorage.loadThemeMode(),
+    ]);
+    final storedSession = restoredState[0] as StoredAuthSession?;
+    final storedThemeMode = restoredState[1] as ThemeMode?;
     if (!mounted) {
       return;
     }
@@ -85,6 +94,7 @@ class _GoitResellerAppState extends State<GoitResellerApp>
     setState(() {
       _session = storedSession?.session;
       _sessionExpiresAt = storedSession?.expiresAt;
+      _themeMode = storedThemeMode ?? ThemeMode.system;
       _isRestoringSession = false;
     });
 
@@ -188,6 +198,20 @@ class _GoitResellerAppState extends State<GoitResellerApp>
     unawaited(_expireSession());
   }
 
+  void _handleThemeToggle(Brightness currentBrightness) {
+    final nextMode =
+        currentBrightness == Brightness.dark ? ThemeMode.light : ThemeMode.dark;
+    if (_themeMode == nextMode) {
+      return;
+    }
+
+    setState(() {
+      _themeMode = nextMode;
+    });
+
+    unawaited(_themeModeStorage.saveThemeMode(nextMode));
+  }
+
   void _changeLocale(Locale locale) {
     if (_locale?.languageCode == locale.languageCode) {
       return;
@@ -199,7 +223,8 @@ class _GoitResellerAppState extends State<GoitResellerApp>
   }
 
   Locale get _currentLocale {
-    final candidate = _locale ?? WidgetsBinding.instance.platformDispatcher.locale;
+    final candidate =
+        _locale ?? WidgetsBinding.instance.platformDispatcher.locale;
 
     for (final supportedLocale in AppLocalizations.supportedLocales) {
       if (supportedLocale.languageCode == candidate.languageCode) {
@@ -240,8 +265,7 @@ class _GoitResellerAppState extends State<GoitResellerApp>
 
   @override
   Widget build(BuildContext context) {
-    final hasActiveSession =
-        _session != null &&
+    final hasActiveSession = _session != null &&
         _sessionExpiresAt != null &&
         DateTime.now().isBefore(_sessionExpiresAt!);
     final navigatorKey = hasActiveSession
@@ -254,6 +278,8 @@ class _GoitResellerAppState extends State<GoitResellerApp>
       locale: _locale,
       onGenerateTitle: (context) => context.l10n.appTitle,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: _themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       localeResolutionCallback: (locale, supportedLocales) {
@@ -272,23 +298,25 @@ class _GoitResellerAppState extends State<GoitResellerApp>
       home: _isRestoringSession
           ? const _AppBootstrapScreen()
           : !hasActiveSession
-          ? LoginPage(
-              authService: _authService,
-              biometricLoginService: _biometricLoginService,
-              currentLocale: _currentLocale,
-              onLoggedIn: _handleLoggedIn,
-              onLocaleChanged: _changeLocale,
-            )
-          : DashboardPage(
-              session: _session!,
-              authService: _authService,
-              customerRepository: _customerRepository,
-              currentLocale: _currentLocale,
-              transactionRepository: _transactionRepository,
-              onLoggedOut: _handleLoggedOut,
-              onRefreshCurrentUser: _refreshCurrentUser,
-              onLocaleChanged: _changeLocale,
-            ),
+              ? LoginPage(
+                  authService: _authService,
+                  biometricLoginService: _biometricLoginService,
+                  currentLocale: _currentLocale,
+                  onLoggedIn: _handleLoggedIn,
+                  onLocaleChanged: _changeLocale,
+                  onThemeToggle: _handleThemeToggle,
+                )
+              : DashboardPage(
+                  session: _session!,
+                  authService: _authService,
+                  customerRepository: _customerRepository,
+                  currentLocale: _currentLocale,
+                  transactionRepository: _transactionRepository,
+                  onLoggedOut: _handleLoggedOut,
+                  onRefreshCurrentUser: _refreshCurrentUser,
+                  onLocaleChanged: _changeLocale,
+                  onThemeToggle: _handleThemeToggle,
+                ),
     );
   }
 }
