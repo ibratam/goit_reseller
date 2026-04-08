@@ -848,16 +848,16 @@ class _TransactionTile extends StatelessWidget {
           if (transaction.operationType != null ||
               transaction.paymentMethod != null) ...[
             const SizedBox(height: 4),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (transaction.operationType != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      l10n.localizeValue(transaction.operationType!),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF9CA3AF),
-                      ),
+                  Text(
+                    l10n.localizeValue(transaction.operationType!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF9CA3AF),
                     ),
                   ),
                 if (transaction.paymentMethod != null)
@@ -867,7 +867,6 @@ class _TransactionTile extends StatelessWidget {
                       color: const Color(0xFF9CA3AF),
                     ),
                   ),
-                const Spacer(),
                 if (transaction.createdAt != null)
                   Text(
                     transaction.createdAt!,
