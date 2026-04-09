@@ -235,32 +235,35 @@ class _GoitResellerAppState extends State<GoitResellerApp>
     return AppLocalizations.supportedLocales.first;
   }
 
-  Future<void> _refreshCurrentUser() async {
+  Future<AuthSession?> _refreshCurrentUser() async {
     await _expireSessionIfNeeded();
 
     final currentSession = _session;
     if (currentSession == null) {
-      return;
+      return null;
     }
 
     final user = await _authService.fetchCurrentUser(currentSession);
+    final updatedSession = currentSession.copyWith(user: user);
     if (!mounted) {
-      return;
+      return updatedSession;
     }
 
     setState(() {
-      _session = currentSession.copyWith(user: user);
+      _session = updatedSession;
     });
 
     final expiresAt = _sessionExpiresAt;
     if (expiresAt != null) {
       unawaited(
         _persistSession(
-          _session!,
+          updatedSession,
           expiresAt: expiresAt,
         ),
       );
     }
+
+    return updatedSession;
   }
 
   @override

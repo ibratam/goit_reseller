@@ -39,7 +39,7 @@ class DashboardPage extends StatefulWidget {
   final TransactionRepository transactionRepository;
   final Locale currentLocale;
   final VoidCallback onLoggedOut;
-  final Future<void> Function() onRefreshCurrentUser;
+  final Future<AuthSession?> Function() onRefreshCurrentUser;
   final ValueChanged<Locale> onLocaleChanged;
   final ValueChanged<Brightness> onThemeToggle;
 
@@ -48,6 +48,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  late AuthSession _session;
   bool _isLoading = true;
   bool _isRefreshingAccount = false;
   bool _isLoggingOut = false;
@@ -62,7 +63,16 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    _session = widget.session;
     _loadDashboard();
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.session != widget.session) {
+      _session = widget.session;
+    }
   }
 
   Future<void> _loadDashboard() async {
@@ -77,17 +87,17 @@ class _DashboardPageState extends State<DashboardPage> {
     try {
       final results = await Future.wait([
         widget.customerRepository.searchCustomers(
-          session: widget.session,
+          session: _session,
           expired: true,
           limit: 1000,
         ),
         widget.customerRepository.searchCustomers(
-          session: widget.session,
+          session: _session,
           expiresInDays: 3,
           limit: 1000,
         ),
         widget.transactionRepository.fetchTransactions(
-          session: widget.session,
+          session: _session,
           query: TransactionHistoryQuery(
             startDate: today,
             endDate: today,
@@ -145,7 +155,12 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isRefreshingAccount = true);
 
     try {
-      await widget.onRefreshCurrentUser();
+      final refreshedSession = await widget.onRefreshCurrentUser();
+      if (refreshedSession != null && mounted) {
+        setState(() {
+          _session = refreshedSession;
+        });
+      }
     } on AuthException catch (error) {
       if (!silent && mounted) {
         _showMessage(context.l10n.localizeDynamicMessage(error.message));
@@ -166,7 +181,7 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isLoggingOut = true);
 
     try {
-      await widget.authService.logout(widget.session);
+      await widget.authService.logout(_session);
     } catch (_) {
     } finally {
       if (mounted) widget.onLoggedOut();
@@ -184,7 +199,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final user = widget.session.user;
+    final user = _session.user;
 
     return Scaffold(
       appBar: AppBar(
@@ -376,7 +391,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => CustomerListPage(
-                        session: widget.session,
+                        session: _session,
                         customerRepository: widget.customerRepository,
                         filter: CustomerListFilter.expired,
                       ),
@@ -399,7 +414,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => CustomerListPage(
-                        session: widget.session,
+                        session: _session,
                         customerRepository: widget.customerRepository,
                         filter: CustomerListFilter.expiringSoon,
                       ),
@@ -487,7 +502,7 @@ class _DashboardPageState extends State<DashboardPage> {
           currentLocale: widget.currentLocale,
           onLocaleChanged: widget.onLocaleChanged,
           onThemeToggle: widget.onThemeToggle,
-          session: widget.session,
+          session: _session,
           transactionRepository: widget.transactionRepository,
         ),
       ),
@@ -540,12 +555,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Icon(Icons.person, color: Colors.white, size: 32),
               ),
               accountName: Text(
-                widget.session.user.name.isEmpty
-                    ? widget.session.user.username
-                    : widget.session.user.name,
+                _session.user.name.isEmpty
+                    ? _session.user.username
+                    : _session.user.name,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              accountEmail: Text(widget.session.user.username),
+              accountEmail: Text(_session.user.username),
               decoration: const BoxDecoration(color: Color(0xFF0F766E)),
             ),
             ListTile(
@@ -561,7 +576,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute<void>(
                     builder: (_) => CustomerSearchPage(
-                      session: widget.session,
+                      session: _session,
                       authService: widget.authService,
                       customerRepository: widget.customerRepository,
                       currentLocale: widget.currentLocale,
@@ -583,7 +598,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => CustomerListPage(
-                      session: widget.session,
+                      session: _session,
                       customerRepository: widget.customerRepository,
                       filter: CustomerListFilter.expiringSoon,
                     ),
@@ -599,7 +614,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => CustomerListPage(
-                      session: widget.session,
+                      session: _session,
                       customerRepository: widget.customerRepository,
                       filter: CustomerListFilter.expired,
                     ),
@@ -618,7 +633,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       currentLocale: widget.currentLocale,
                       onLocaleChanged: widget.onLocaleChanged,
                       onThemeToggle: widget.onThemeToggle,
-                      session: widget.session,
+                      session: _session,
                       transactionRepository: widget.transactionRepository,
                     ),
                   ),

@@ -39,7 +39,7 @@ class CustomerSearchPage extends StatefulWidget {
   final Locale currentLocale;
   final TransactionRepository transactionRepository;
   final VoidCallback onLoggedOut;
-  final Future<void> Function() onRefreshCurrentUser;
+  final Future<AuthSession?> Function() onRefreshCurrentUser;
   final ValueChanged<Locale> onLocaleChanged;
   final ValueChanged<Brightness> onThemeToggle;
 
@@ -50,6 +50,7 @@ class CustomerSearchPage extends StatefulWidget {
 class _CustomerSearchPageState extends State<CustomerSearchPage> {
   final _customerNameController = TextEditingController();
   final _mobileController = TextEditingController();
+  late AuthSession _session;
 
   List<CustomerServiceRecord> _results = const [];
   final Set<int> _extendingServiceIds = <int>{};
@@ -63,9 +64,18 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   @override
   void initState() {
     super.initState();
+    _session = widget.session;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshCurrentUser(silent: true);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomerSearchPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.session != widget.session) {
+      _session = widget.session;
+    }
   }
 
   @override
@@ -104,7 +114,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
 
     try {
       final results = await widget.customerRepository.searchCustomers(
-        session: widget.session,
+        session: _session,
         customerName: customerName.isEmpty ? null : customerName,
         mobile: mobile.isEmpty ? null : mobile,
         expired:
@@ -156,7 +166,12 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     });
 
     try {
-      await widget.onRefreshCurrentUser();
+      final refreshedSession = await widget.onRefreshCurrentUser();
+      if (refreshedSession != null && mounted) {
+        setState(() {
+          _session = refreshedSession;
+        });
+      }
     } on AuthException catch (error) {
       if (!silent && mounted) {
         _showMessage(context.l10n.localizeDynamicMessage(error.message));
@@ -184,7 +199,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     });
 
     try {
-      await widget.authService.logout(widget.session);
+      await widget.authService.logout(_session);
     } catch (_) {
       // Clear the local session even if the server-side logout fails.
     } finally {
@@ -199,7 +214,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       context: context,
       builder: (context) {
         return _AddCreditDialog(
-          session: widget.session,
+          session: _session,
           customerRepository: widget.customerRepository,
           record: record,
         );
@@ -245,7 +260,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
 
     try {
       final result = await widget.customerRepository.extendService(
-        session: widget.session,
+        session: _session,
         customerServiceId: record.id,
       );
 
@@ -293,7 +308,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
           currentLocale: widget.currentLocale,
           onLocaleChanged: widget.onLocaleChanged,
           onThemeToggle: widget.onThemeToggle,
-          session: widget.session,
+          session: _session,
           transactionRepository: widget.transactionRepository,
         ),
       ),
@@ -304,7 +319,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => CustomerListPage(
-          session: widget.session,
+          session: _session,
           customerRepository: widget.customerRepository,
           filter: CustomerListFilter.expiringSoon,
         ),
@@ -316,7 +331,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => CustomerListPage(
-          session: widget.session,
+          session: _session,
           customerRepository: widget.customerRepository,
           filter: CustomerListFilter.expired,
         ),
@@ -337,12 +352,12 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 child: Icon(Icons.person, color: Colors.white, size: 32),
               ),
               accountName: Text(
-                widget.session.user.name.isEmpty
-                    ? widget.session.user.username
-                    : widget.session.user.name,
+                _session.user.name.isEmpty
+                    ? _session.user.username
+                    : _session.user.name,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              accountEmail: Text(widget.session.user.username),
+              accountEmail: Text(_session.user.username),
               decoration: const BoxDecoration(
                 color: Color(0xFF0F766E),
               ),
@@ -355,7 +370,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute<void>(
                     builder: (_) => DashboardPage(
-                      session: widget.session,
+                      session: _session,
                       authService: widget.authService,
                       customerRepository: widget.customerRepository,
                       currentLocale: widget.currentLocale,
@@ -512,7 +527,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final user = widget.session.user;
+    final user = _session.user;
 
     return Scaffold(
       appBar: AppBar(
