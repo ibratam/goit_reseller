@@ -107,6 +107,8 @@ class AppLocalizations {
       : 'Search with customer name, mobile number, or both. Results come from /api/customers/services/search.';
   String get serviceStatusFilterLabel =>
       isArabic ? 'تصفية حالة الخدمة' : 'Service status';
+  String get connectionStatusFilterLabel =>
+      isArabic ? 'حالة الاتصال' : 'Connection status';
   String get customerNameLabel => isArabic ? 'اسم العميل' : 'Customer name';
   String get mobileNumberLabel => isArabic ? 'رقم الجوال' : 'Mobile number';
   String get search => isArabic ? 'بحث' : 'Search';
@@ -184,6 +186,9 @@ class AppLocalizations {
       : 'No subscriptions expiring within 3 days.';
   String get noExpiredSubscriptions =>
       isArabic ? 'لا توجد اشتراكات منتهية.' : 'No expired subscriptions.';
+  String noExpiredSubscriptionsForStatus(String status) => isArabic
+      ? 'لا توجد اشتراكات منتهية بحالة $status.'
+      : 'No expired subscriptions with $status status.';
   String get failedToLoadCustomers => isArabic
       ? 'فشل تحميل البيانات. حاول مرة أخرى.'
       : 'Failed to load data. Please try again.';

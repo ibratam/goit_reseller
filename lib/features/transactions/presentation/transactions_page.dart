@@ -324,10 +324,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
-                  const Center(
-                    child: BrandLogo(width: 190),
-                  ),
-                  const SizedBox(height: 20),
+                  // const Center(
+                  //   child: BrandLogo(width: 190),
+                  // ),
+                  // const SizedBox(height: 20),
                   Card(
                     shape: theme.appCardShape(),
                     child: Padding(
@@ -361,14 +361,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          l10n.filterTransactionsSubtitle,
-                                          style: theme.textTheme.bodyLarge
-                                              ?.copyWith(
-                                            color: theme.appMutedTextColor,
-                                          ),
-                                        ),
+                                        // const SizedBox(height: 12),
+                                        // Text(
+                                        //   l10n.filterTransactionsSubtitle,
+                                        //   style: theme.textTheme.bodyLarge
+                                        //       ?.copyWith(
+                                        //     color: theme.appMutedTextColor,
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                   ),
@@ -455,96 +455,96 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                               },
                                             ),
                                           ),
-                                          SizedBox(
-                                            width: isCompact
-                                                ? double.infinity
-                                                : 220,
-                                            child: DropdownButtonFormField<
-                                                String?>(
-                                              key: ValueKey(
-                                                'transaction-type-${_transactionType ?? 'all'}',
-                                              ),
-                                              initialValue: _transactionType,
-                                              decoration: InputDecoration(
-                                                labelText:
-                                                    l10n.transactionTypeLabel,
-                                                prefixIcon: const Icon(
-                                                    Icons.swap_horiz),
-                                              ),
-                                              items: [
-                                                DropdownMenuItem<String?>(
-                                                  value: null,
-                                                  child: Text(l10n.allLabel),
-                                                ),
-                                                DropdownMenuItem<String?>(
-                                                  value: 'credit',
-                                                  child: Text(l10n.creditLabel),
-                                                ),
-                                                DropdownMenuItem<String?>(
-                                                  value: 'debit',
-                                                  child: Text(l10n.debitLabel),
-                                                ),
-                                              ],
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _transactionType = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: isCompact
-                                                ? double.infinity
-                                                : 220,
-                                            child: DropdownButtonFormField<
-                                                String?>(
-                                              key: ValueKey(
-                                                'payment-method-${_paymentMethod ?? 'all'}',
-                                              ),
-                                              initialValue: _paymentMethod,
-                                              decoration: InputDecoration(
-                                                labelText:
-                                                    l10n.paymentMethodLabel,
-                                                prefixIcon: const Icon(
-                                                  Icons.payments_outlined,
-                                                ),
-                                              ),
-                                              items: [
-                                                DropdownMenuItem<String?>(
-                                                  value: null,
-                                                  child: Text(l10n.allLabel),
-                                                ),
-                                                DropdownMenuItem<String?>(
-                                                  value: 'cash',
-                                                  child: Text(l10n.cashLabel),
-                                                ),
-                                                DropdownMenuItem<String?>(
-                                                  value: 'cheque',
-                                                  child: Text(l10n.chequeLabel),
-                                                ),
-                                              ],
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _paymentMethod = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: isCompact
-                                                ? double.infinity
-                                                : 220,
-                                            child: TextField(
-                                              controller:
-                                                  _operationTypeController,
-                                              decoration: InputDecoration(
-                                                labelText:
-                                                    l10n.operationTypeLabel,
-                                                prefixIcon:
-                                                    const Icon(Icons.tune),
-                                              ),
-                                            ),
-                                          ),
+                                          // SizedBox(
+                                          //   width: isCompact
+                                          //       ? double.infinity
+                                          //       : 220,
+                                          //   child: DropdownButtonFormField<
+                                          //       String?>(
+                                          //     key: ValueKey(
+                                          //       'transaction-type-${_transactionType ?? 'all'}',
+                                          //     ),
+                                          //     initialValue: _transactionType,
+                                          //     decoration: InputDecoration(
+                                          //       labelText:
+                                          //           l10n.transactionTypeLabel,
+                                          //       prefixIcon: const Icon(
+                                          //           Icons.swap_horiz),
+                                          //     ),
+                                          //     items: [
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: null,
+                                          //         child: Text(l10n.allLabel),
+                                          //       ),
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: 'credit',
+                                          //         child: Text(l10n.creditLabel),
+                                          //       ),
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: 'debit',
+                                          //         child: Text(l10n.debitLabel),
+                                          //       ),
+                                          //     ],
+                                          //     onChanged: (value) {
+                                          //       setState(() {
+                                          //         _transactionType = value;
+                                          //       });
+                                          //     },
+                                          //   ),
+                                          // ),
+                                          // SizedBox(
+                                          //   width: isCompact
+                                          //       ? double.infinity
+                                          //       : 220,
+                                          //   child: DropdownButtonFormField<
+                                          //       String?>(
+                                          //     key: ValueKey(
+                                          //       'payment-method-${_paymentMethod ?? 'all'}',
+                                          //     ),
+                                          //     initialValue: _paymentMethod,
+                                          //     decoration: InputDecoration(
+                                          //       labelText:
+                                          //           l10n.paymentMethodLabel,
+                                          //       prefixIcon: const Icon(
+                                          //         Icons.payments_outlined,
+                                          //       ),
+                                          //     ),
+                                          //     items: [
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: null,
+                                          //         child: Text(l10n.allLabel),
+                                          //       ),
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: 'cash',
+                                          //         child: Text(l10n.cashLabel),
+                                          //       ),
+                                          //       DropdownMenuItem<String?>(
+                                          //         value: 'cheque',
+                                          //         child: Text(l10n.chequeLabel),
+                                          //       ),
+                                          //     ],
+                                          //     onChanged: (value) {
+                                          //       setState(() {
+                                          //         _paymentMethod = value;
+                                          //       });
+                                          //     },
+                                          //   ),
+                                          // ),
+                                          // SizedBox(
+                                          //   width: isCompact
+                                          //       ? double.infinity
+                                          //       : 220,
+                                          //   child: TextField(
+                                          //     controller:
+                                          //         _operationTypeController,
+                                          //     decoration: InputDecoration(
+                                          //       labelText:
+                                          //           l10n.operationTypeLabel,
+                                          //       prefixIcon:
+                                          //           const Icon(Icons.tune),
+                                          //     ),
+                                          //   ),
+                                          // ),
                                           SizedBox(
                                             width: isCompact
                                                 ? double.infinity

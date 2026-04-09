@@ -161,6 +161,7 @@ class _DashboardPageState extends State<DashboardPage> {
           _session = refreshedSession;
         });
       }
+      await _loadDashboard();
     } on AuthException catch (error) {
       if (!silent && mounted) {
         _showMessage(context.l10n.localizeDynamicMessage(error.message));

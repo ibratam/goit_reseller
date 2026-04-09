@@ -10,6 +10,8 @@ import 'widgets/customer_service_card.dart';
 
 enum CustomerListFilter { expiringSoon, expired }
 
+enum _ConnectionStatusFilter { all, online, offline }
+
 class CustomerListPage extends StatefulWidget {
   const CustomerListPage({
     required this.session,
@@ -29,6 +31,7 @@ class CustomerListPage extends StatefulWidget {
 class _CustomerListPageState extends State<CustomerListPage> {
   List<CustomerServiceRecord> _records = const [];
   final Set<int> _extendingServiceIds = <int>{};
+  _ConnectionStatusFilter _connectionStatusFilter = _ConnectionStatusFilter.all;
   bool _isLoading = true;
   String? _errorText;
 
@@ -162,6 +165,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
   }
 
   Widget _buildContent(ThemeData theme, AppLocalizations l10n) {
+    final visibleRecords = _filteredRecords;
+
     if (_isLoading) {
       return const Center(
         child: Padding(
@@ -179,7 +184,11 @@ class _CustomerListPageState extends State<CustomerListPage> {
       return _buildEmpty(l10n);
     }
 
-    return _buildList(theme, l10n);
+    if (visibleRecords.isEmpty) {
+      return _buildFilteredEmpty(l10n);
+    }
+
+    return _buildList(theme, l10n, visibleRecords);
   }
 
   Widget _buildError(AppLocalizations l10n) {
@@ -253,20 +262,69 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
-  Widget _buildList(ThemeData theme, AppLocalizations l10n) {
+  Widget _buildFilteredEmpty(AppLocalizations l10n) {
+    final statusLabel = switch (_connectionStatusFilter) {
+      _ConnectionStatusFilter.all => l10n.allLabel,
+      _ConnectionStatusFilter.online => l10n.localizeValue('online'),
+      _ConnectionStatusFilter.offline => l10n.localizeValue('offline'),
+    };
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
+        if (widget.filter == CustomerListFilter.expired) ...[
+          _buildConnectionStatusFilters(l10n),
+          const SizedBox(height: 20),
+        ],
+        Card(
+          shape: Theme.of(context).appCardShape(),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.wifi_tethering_off_outlined,
+                  size: 48,
+                  color: Color(0xFF0F766E),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.noExpiredSubscriptionsForStatus(statusLabel),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildList(
+    ThemeData theme,
+    AppLocalizations l10n,
+    List<CustomerServiceRecord> visibleRecords,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        if (widget.filter == CustomerListFilter.expired) ...[
+          _buildConnectionStatusFilters(l10n),
+          const SizedBox(height: 20),
+        ],
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            l10n.resultCount(_records.length),
+            l10n.resultCount(visibleRecords.length),
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
-        ..._records.map(
+        ...visibleRecords.map(
           (record) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: CustomerServiceCard(
@@ -275,6 +333,74 @@ class _CustomerListPageState extends State<CustomerListPage> {
               isExtendingService: _extendingServiceIds.contains(record.id),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  List<CustomerServiceRecord> get _filteredRecords {
+    if (widget.filter != CustomerListFilter.expired) {
+      return _records;
+    }
+
+    return _records.where((record) {
+      switch (_connectionStatusFilter) {
+        case _ConnectionStatusFilter.all:
+          return true;
+        case _ConnectionStatusFilter.online:
+          return record.isOnline;
+        case _ConnectionStatusFilter.offline:
+          return !record.isOnline;
+      }
+    }).toList(growable: false);
+  }
+
+  Widget _buildConnectionStatusFilters(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.connectionStatusFilterLabel,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).appMutedTextColor,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            ChoiceChip(
+              label: Text(l10n.allLabel),
+              selected: _connectionStatusFilter == _ConnectionStatusFilter.all,
+              onSelected: (_) {
+                setState(() {
+                  _connectionStatusFilter = _ConnectionStatusFilter.all;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: Text(l10n.localizeValue('online')),
+              selected:
+                  _connectionStatusFilter == _ConnectionStatusFilter.online,
+              onSelected: (_) {
+                setState(() {
+                  _connectionStatusFilter = _ConnectionStatusFilter.online;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: Text(l10n.localizeValue('offline')),
+              selected:
+                  _connectionStatusFilter == _ConnectionStatusFilter.offline,
+              onSelected: (_) {
+                setState(() {
+                  _connectionStatusFilter = _ConnectionStatusFilter.offline;
+                });
+              },
+            ),
+          ],
         ),
       ],
     );
